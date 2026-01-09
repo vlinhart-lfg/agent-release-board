@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Analytics - Product Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #4A44D4;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --alert: #EF4444;
+            --agent-blue: #3B82F6;
+            --non-agent-gray: #9CA3AF;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border: #E5E7EB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .dashboard {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-white);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: var(--bg-light);
+        }
+
+        /* View Container */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Hero Card - North Star */
+        .hero-card {
+            background: linear-gradient(135deg, var(--bg-white) 0%, #F3F4FF 100%);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+        }
+
+        .hero-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .hero-title {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .hero-value-row {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .hero-value {
+            font-size: 64px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .hero-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 20px;
+            color: var(--success);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .hero-trend.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--alert);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 16px;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: var(--bg-light);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-target-zone {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: rgba(108, 99, 255, 0.15);
+            border-left: 2px dashed var(--primary);
+            border-right: 2px dashed var(--primary);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-marker {
+            position: absolute;
+            top: -6px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transform: translateX(-50%);
+        }
+
+        /* Sparkline placeholder */
+        .sparkline-container {
+            height: 60px;
+            margin-top: 16px;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .metric-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .metric-status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .metric-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .metric-status.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .metric-status.alert {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--alert);
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .metric-target {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Usage Stats Grid */
+        .usage-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .usage-stat {
+            text-align: center;
+            padding: 24px 16px;
+            background: var(--bg-light);
+            border-radius: 12px;
+        }
+
+        .usage-stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .usage-stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .usage-stat-trend {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .usage-stat-trend.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .usage-stat-trend.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--alert);
+        }
+
+        .usage-stat-trend.neutral {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-secondary);
+        }
+
+        /* Two Column Layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        /* Retention Comparison Chart */
+        .retention-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .retention-row {
+            display: grid;
+            grid-template-columns: 60px 1fr 60px;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .retention-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .retention-bar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .retention-bar-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .retention-bar {
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding-right: 8px;
+            justify-content: flex-end;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            min-width: 40px;
+        }
+
+        .retention-bar.agent {
+            background: linear-gradient(90deg, var(--agent-blue), #60A5FA);
+        }
+
+        .retention-bar.non-agent {
+            background: var(--non-agent-gray);
+        }
+
+        .retention-lift {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--success);
+            text-align: right;
+        }
+
+        .retention-legend {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .legend-dot.agent {
+            background: var(--agent-blue);
+        }
+
+        .legend-dot.non-agent {
+            background: var(--non-agent-gray);
+        }
+
+        .retention-summary {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .retention-summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .retention-summary-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Alerts Panel */
+        .alerts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .alert-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .alert-icon.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .alert-icon.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .alert-icon.alert {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--alert);
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .alert-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Churn Risk Card */
+        .churn-card {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #F59E0B;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .churn-donut {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+
+        .churn-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--warning);
+        }
+
+        .churn-text {
+            flex: 1;
+        }
+
+        .churn-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .churn-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== VIEW 2 STYLES ========== */
+
+        /* Funnel */
+        .funnel-container {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .funnel-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 24px 0;
+        }
+
+        .funnel-stage {
+            text-align: center;
+            position: relative;
+        }
+
+        .funnel-box {
+            padding: 24px 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 12px;
+            min-width: 160px;
+        }
+
+        .funnel-box.stage-1 {
+            background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
+            color: var(--primary-dark);
+        }
+
+        .funnel-box.stage-2 {
+            background: linear-gradient(135deg, #A5B4FC, #818CF8);
+            color: white;
+        }
+
+        .funnel-box.stage-3 {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .funnel-stage-name {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .funnel-stage-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .funnel-stage-label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .funnel-stage-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .funnel-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 16px;
+        }
+
+        .funnel-arrow-line {
+            width: 60px;
+            height: 3px;
+            background: var(--border);
+            position: relative;
+        }
+
+        .funnel-arrow-line::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -4px;
+            border: 6px solid transparent;
+            border-left-color: var(--border);
+        }
+
+        .funnel-conversion {
+            background: var(--bg-white);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            border: 1px solid var(--border);
+            margin-bottom: 8px;
+        }
+
+        /* Building Sub-stages */
+        .building-substages {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .substage-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .substage-label {
+            font-size: 11px;
+            font-weight: 500;
+            width: 80px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+
+        .substage-bar-track {
+            flex: 1;
+            height: 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .substage-bar-fill {
+            height: 100%;
+            background: rgba(255,255,255,0.6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 6px;
+            transition: width 0.3s ease;
+        }
+
+        .substage-bar-fill.at-risk {
+            background: rgba(239, 68, 68, 0.7);
+        }
+
+        .substage-value {
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .substage-count {
+            font-size: 11px;
+            font-weight: 500;
+            width: 45px;
+            text-align: right;
+        }
+
+        /* Substage Breakdown Section */
+        .substage-breakdown {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .substage-card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            min-width: 130px;
+            text-align: center;
+        }
+
+        .substage-card.production {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border-color: var(--success);
+        }
+
+        .substage-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .substage-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .substage-badge {
+            font-size: 9px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .substage-badge.at-risk {
+            background: #fef2f2;
+            color: var(--alert);
+        }
+
+        .substage-metric {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .substage-card.production .substage-metric {
+            color: var(--success);
+        }
+
+        .substage-users {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .substage-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
+
+        .substage-arrow {
+            font-size: 20px;
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        /* Experiment Analytics */
+        .experiment-section {
+            margin-top: 16px;
+        }
+
+        .experiment-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .experiment-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .experiment-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .experiment-funnel {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 16px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .experiment-stage {
+            text-align: center;
+            min-width: 140px;
+        }
+
+        .experiment-stage.highlight {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--success);
+        }
+
+        .experiment-stage-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .experiment-stage.highlight .experiment-stage-value {
+            color: var(--success);
+        }
+
+        .experiment-stage-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        .experiment-stage-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .experiment-substages {
+            margin-top: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .experiment-substage {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 4px 0;
+        }
+
+        .substage-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .substage-dot.created {
+            background: #fca5a5;
+        }
+
+        .substage-dot.configured {
+            background: #a5b4fc;
+        }
+
+        .substage-dot.production {
+            background: #86efac;
+        }
+
+        .experiment-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 20px;
+            padding-top: 10px;
+        }
+
+        .experiment-conversion {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            background: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-bottom: 4px;
+        }
+
+        .experiment-summary {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .experiment-summary strong {
+            color: var(--success);
+            font-size: 15px;
+        }
+
+        /* Feature Adoption */
+        .feature-adoption-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .feature-adoption-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .feature-adoption-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .feature-adoption-icon.knowledge {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .feature-adoption-icon.tools {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .feature-adoption-icon.websearch {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .feature-adoption-icon.mcp {
+            background: #f3e8ff;
+            color: #9333ea;
+        }
+
+        .feature-adoption-info {
+            flex: 1;
+        }
+
+        .feature-adoption-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .feature-adoption-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .feature-adoption-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Stats Grid for View 2 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Building Phase Card */
+        .building-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .building-stat {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .building-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .building-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .building-stat-target {
+            font-size: 11px;
+            color: var(--success);
+            margin-top: 4px;
+        }
+
+        /* Templates Table */
+        .templates-table {
+            width: 100%;
+        }
+
+        .template-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .template-row:last-child {
+            border-bottom: none;
+        }
+
+        .template-rank {
+            width: 28px;
+            height: 28px;
+            background: var(--bg-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-right: 12px;
+        }
+
+        .template-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .template-uses {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-right: 16px;
+        }
+
+        .template-rate {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .template-summary {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .template-summary-item {
+            text-align: center;
+        }
+
+        .template-summary-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .template-summary-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Segments Section */
+        .segments-container {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .segments-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .segment-group h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .segment-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .segment-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .segment-bar-label {
+            width: 80px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .segment-bar-track {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .segment-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+        }
+
+        .segment-bar-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 100;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Info Icon */
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--bg-light);
+            border-radius: 50%;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-left: 4px;
+            cursor: help;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+            .dashboard {
+                padding: 0;
+            }
+            .tab-nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">M</div>
+                <div>
+                    <div class="header-title">AI Agent Analytics</div>
+                    <div class="header-subtitle">Product Dashboard</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="date-selector">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Last 30 Days
+                </div>
+                <nav class="tab-nav">
+                    <button class="tab-btn active" onclick="showView('view1', this)">Overview</button>
+                    <button class="tab-btn" onclick="showView('view2', this)">Funnel & Adoption</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- View 1: Executive Overview -->
+        <div id="view1" class="view active">
+            <!-- North Star Hero Card -->
+            <div class="hero-card">
+                <div class="hero-label">North Star Metric</div>
+                <div class="hero-title tooltip" data-tooltip="(Users with 1+ Production Agent) / (Users with 1+ Active Scenario)">
+                    Active Agent Adoption Rate
+                    <span class="info-icon">?</span>
+                </div>
+                <div class="hero-value-row">
+                    <div class="hero-value">34.2%</div>
+                    <div class="hero-trend">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                            <polyline points="17 6 23 6 23 12"></polyline>
+                        </svg>
+                        +2.3% vs last month
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-labels">
+                        <span>0%</span>
+                        <span>Target Zone: 30-40%</span>
+                        <span>100%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-target-zone" style="left: 30%; width: 10%;"></div>
+                        <div class="progress-fill" style="width: 34.2%;"></div>
+                        <div class="progress-marker" style="left: 34.2%;"></div>
+                    </div>
+                </div>
+                <div class="sparkline-container">
+                    <canvas id="sparklineChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Supporting Metrics -->
+            <div class="cards-grid">
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <span class="metric-label tooltip" data-tooltip="Average from all organizations that have an active agent - total number of agents">Agent Density</span>
+                        <span class="metric-status success">&#10003;</span>
+                    </div>
+                    <div class="metric-value">2.4</div>
+                    <div class="metric-target">active agents/org &bull; Target: &gt;2.0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <span class="metric-label tooltip" data-tooltip="Active agents scenarios vs active scenarios">Agent Share of Automation</span>
+                        <span class="metric-status warning">!</span>
+                    </div>
+                    <div class="metric-value">18.3%</div>
+                    <div class="metric-target">of operations &bull; Target: &gt;20%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-card-header">
+                        <span class="metric-label tooltip" data-tooltip="% of production agents still active after 30 days">Agent Retention Rate</span>
+                        <span class="metric-status success">&#10003;</span>
+                    </div>
+                    <div class="metric-value">87%</div>
+                    <div class="metric-target">at 30 days &bull; Target: &gt;85%</div>
+                </div>
+            </div>
+
+            <!-- Agent Usage Stats -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20V10"></path>
+                            <path d="M18 20V4"></path>
+                            <path d="M6 20v-4"></path>
+                        </svg>
+                    </div>
+                    Agent Usage Stats (Last 30 Days)
+                </div>
+                <div class="usage-stats-grid">
+                    <div class="usage-stat">
+                        <div class="usage-stat-value">4,230</div>
+                        <div class="usage-stat-label">Total Agents Created</div>
+                        <div class="usage-stat-trend positive">+18% vs last month</div>
+                    </div>
+                    <div class="usage-stat">
+                        <div class="usage-stat-value">2,847</div>
+                        <div class="usage-stat-label">Agents Scheduled</div>
+                        <div class="usage-stat-trend positive">+12% vs last month</div>
+                    </div>
+                    <div class="usage-stat">
+                        <div class="usage-stat-value">312</div>
+                        <div class="usage-stat-label">Agents Deleted</div>
+                        <div class="usage-stat-trend negative">+8% vs last month</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Details -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                        </svg>
+                    </div>
+                    Agent Details
+                </div>
+                <div class="building-stats" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+                    <div class="building-stat">
+                        <div class="building-stat-value">4.2</div>
+                        <div class="building-stat-label">Avg Tools/Agent</div>
+                    </div>
+                    <div class="building-stat">
+                        <div class="building-stat-value">2.8</div>
+                        <div class="building-stat-label">Avg Files/Agent</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Adoption -->
+            <div class="section-card" style="margin-top: 24px;">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <path d="M2 17l10 5 10-5"></path>
+                            <path d="M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    Feature Adoption
+                </div>
+                <div class="feature-adoption-grid">
+                    <div class="feature-adoption-item">
+                        <div class="feature-adoption-icon knowledge">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="feature-adoption-info">
+                            <div class="feature-adoption-name">Knowledge</div>
+                            <div class="feature-adoption-desc">Agents with Agent Knowledge Module</div>
+                        </div>
+                        <div class="feature-adoption-value">67%</div>
+                    </div>
+                    <div class="feature-adoption-item">
+                        <div class="feature-adoption-icon tools">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                            </svg>
+                        </div>
+                        <div class="feature-adoption-info">
+                            <div class="feature-adoption-name">Tools</div>
+                            <div class="feature-adoption-desc">Agents with Make modules</div>
+                        </div>
+                        <div class="feature-adoption-value">84%</div>
+                    </div>
+                    <div class="feature-adoption-item">
+                        <div class="feature-adoption-icon websearch">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="M21 21l-4.35-4.35"></path>
+                            </svg>
+                        </div>
+                        <div class="feature-adoption-info">
+                            <div class="feature-adoption-name">Make AI Web Search</div>
+                            <div class="feature-adoption-desc">Agents with web search enabled</div>
+                        </div>
+                        <div class="feature-adoption-value">23%</div>
+                    </div>
+                    <div class="feature-adoption-item">
+                        <div class="feature-adoption-icon mcp">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                <path d="M2 17l10 5 10-5"></path>
+                                <path d="M2 12l10 5 10-5"></path>
+                            </svg>
+                        </div>
+                        <div class="feature-adoption-info">
+                            <div class="feature-adoption-name">MCP</div>
+                            <div class="feature-adoption-desc">Agents with MCP integration</div>
+                        </div>
+                        <div class="feature-adoption-value">12%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 2: Funnel & Adoption -->
+        <div id="view2" class="view">
+            <!-- Adoption Funnel -->
+            <div class="funnel-container">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                    </div>
+                    Adoption Funnel
+                </div>
+                <div class="funnel-visual">
+                    <div class="funnel-stage">
+                        <div class="funnel-box stage-1">
+                            <div class="funnel-stage-name">Discovery</div>
+                            <div class="funnel-stage-value">12,450</div>
+                            <div class="funnel-stage-label">LLM module users</div>
+                        </div>
+                        <div class="funnel-stage-time">Using AI modules</div>
+                    </div>
+                    <div class="funnel-arrow">
+                        <div class="funnel-conversion">12%</div>
+                        <div class="funnel-arrow-line"></div>
+                    </div>
+                    <div class="funnel-stage">
+                        <div class="funnel-box stage-2">
+                            <div class="funnel-stage-name">Experimenting</div>
+                            <div class="funnel-stage-value">1,494</div>
+                            <div class="funnel-stage-label">users</div>
+                        </div>
+                        <div class="funnel-stage-time">Building agents</div>
+                    </div>
+                    <div class="funnel-arrow">
+                        <div class="funnel-conversion">28%</div>
+                        <div class="funnel-arrow-line"></div>
+                    </div>
+                    <div class="funnel-stage">
+                        <div class="funnel-box stage-3">
+                            <div class="funnel-stage-name">Optimising</div>
+                            <div class="funnel-stage-value">418</div>
+                            <div class="funnel-stage-label">orgs</div>
+                        </div>
+                        <div class="funnel-stage-time">3+ active agents</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experimenting Stage Breakdown -->
+            <div class="section-card" style="margin-bottom: 24px;">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                    </div>
+                    Experimenting Stage Breakdown
+                </div>
+                <div class="substage-breakdown">
+                    <div class="substage-card">
+                        <div class="substage-header">
+                            <span class="substage-name">Created</span>
+                            <span class="substage-badge at-risk">At Risk</span>
+                        </div>
+                        <div class="substage-metric">45%</div>
+                        <div class="substage-users">673 orgs</div>
+                        <div class="substage-desc">Agent exists but not active<br><small>(&lt;2 ops/day last 30 days)</small></div>
+                    </div>
+                    <div class="substage-arrow">&rarr;</div>
+                    <div class="substage-card">
+                        <div class="substage-header">
+                            <span class="substage-name">Configured</span>
+                        </div>
+                        <div class="substage-metric">27%</div>
+                        <div class="substage-users">404 orgs</div>
+                        <div class="substage-desc">Tools/Context added, 1 successful run<br><small>(&lt;2 ops/day last 30 days)</small></div>
+                    </div>
+                    <div class="substage-arrow">&rarr;</div>
+                    <div class="substage-card production">
+                        <div class="substage-header">
+                            <span class="substage-name">Production</span>
+                        </div>
+                        <div class="substage-metric">28%</div>
+                        <div class="substage-users">418 orgs</div>
+                        <div class="substage-desc">1-2 active agents per org<br><small>(&ge;2 ops/day last 30 days)</small></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experiment Analytics -->
+            <div class="section-card" style="margin-bottom: 24px;">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path>
+                        </svg>
+                    </div>
+                    Experiment Analytics
+                </div>
+                <div class="experiment-section">
+                    <div class="experiment-header">
+                        <span class="experiment-name">Library of Agents</span>
+                        <span class="experiment-badge">Active Experiment</span>
+                    </div>
+                    <div class="experiment-funnel">
+                        <div class="experiment-stage">
+                            <div class="experiment-stage-value">2,340</div>
+                            <div class="experiment-stage-label">Clicked Agent</div>
+                        </div>
+                        <div class="experiment-arrow">
+                            <span class="experiment-conversion">38%</span>
+                            &rarr;
+                        </div>
+                        <div class="experiment-stage">
+                            <div class="experiment-stage-value">889</div>
+                            <div class="experiment-stage-label">Experimenting</div>
+                            <div class="experiment-substages">
+                                <div class="experiment-substage">
+                                    <span class="substage-dot created"></span>
+                                    <span>Created: 401</span>
+                                </div>
+                                <div class="experiment-substage">
+                                    <span class="substage-dot configured"></span>
+                                    <span>Configured: 488</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="experiment-arrow">
+                            <span class="experiment-conversion">24%</span>
+                            &rarr;
+                        </div>
+                        <div class="experiment-stage highlight">
+                            <div class="experiment-stage-value">213</div>
+                            <div class="experiment-stage-label">Production</div>
+                            <div class="experiment-stage-desc">1-2 active agents</div>
+                        </div>
+                    </div>
+                    <div class="experiment-summary">
+                        <span>Overall conversion: <strong>9.1%</strong> (Clicked &rarr; Production)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adoption by Plan Type -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </div>
+                    Adoption Rate by Plan Type
+                </div>
+                <div class="segment-bars" style="max-width: 600px;">
+                    <div class="segment-bar-row">
+                        <div class="segment-bar-label">Enterprise</div>
+                        <div class="segment-bar-track">
+                            <div class="segment-bar-fill" style="width: 67%;">
+                                <span class="segment-bar-value">67%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="segment-bar-row">
+                        <div class="segment-bar-label">Team</div>
+                        <div class="segment-bar-track">
+                            <div class="segment-bar-fill" style="width: 52%;">
+                                <span class="segment-bar-value">52%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="segment-bar-row">
+                        <div class="segment-bar-label">Pro</div>
+                        <div class="segment-bar-track">
+                            <div class="segment-bar-fill" style="width: 38%;">
+                                <span class="segment-bar-value">38%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="segment-bar-row">
+                        <div class="segment-bar-label">Free</div>
+                        <div class="segment-bar-track">
+                            <div class="segment-bar-fill" style="width: 18%;">
+                                <span class="segment-bar-value">18%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            Make.com AI Agent Analytics &bull; Product Dashboard &bull; Data as of December 2025
+        </footer>
+    </div>
+
+    <script>
+        // Tab switching
+        function showView(viewId, btn) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // Sparkline Chart
+        const ctx = document.getElementById('sparklineChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12'],
+                datasets: [{
+                    data: [28.1, 28.9, 29.4, 30.1, 30.8, 31.2, 31.9, 32.4, 32.8, 33.1, 33.6, 34.2],
+                    borderColor: '#6C63FF',
+                    backgroundColor: 'rgba(108, 99, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#6C63FF',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10 },
+                            color: '#9CA3AF'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        min: 25,
+                        max: 40,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: { size: 10 },
+                            color: '#9CA3AF',
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    </script>
+</body>
+</html>
