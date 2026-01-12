@@ -252,6 +252,93 @@
             font-size: 11px;
         }
 
+        /* ========== TAG FILTERS SECTION ========== */
+        .tag-filters-section {
+            margin-bottom: 20px;
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid var(--border);
+        }
+
+        .tag-filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .tag-filters-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-filters-clear {
+            font-size: 12px;
+            color: var(--primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .tag-filters-clear.visible {
+            opacity: 1;
+        }
+
+        .tag-filters-clear:hover {
+            text-decoration: underline;
+        }
+
+        .tag-filters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-tag-pill {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--bg-light);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-tag-pill:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .filter-tag-pill.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .filter-tag-count {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-tag-pill.active .filter-tag-count {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         /* ========== MILESTONE COLUMNS ========== */
         .milestones-container {
             display: grid;
@@ -839,6 +926,15 @@
                     <div class="summary-detail" id="blocked-detail">1 blocked</div>
                 </div>
             </div>
+        </section>
+
+        <!-- Tag Filters -->
+        <section class="tag-filters-section">
+            <div class="tag-filters-header">
+                <span class="tag-filters-title">Filter by Tag</span>
+                <button class="tag-filters-clear" id="clear-tag-filter" onclick="clearTagFilter()">Clear filter</button>
+            </div>
+            <div class="tag-filters-container" id="tag-filters-container"></div>
         </section>
 
         <!-- Active Tags -->
@@ -1790,6 +1886,47 @@
             return card;
         }
 
+        // ========== TAG FILTERS (Persistent) ==========
+        function getAllTags() {
+            const tagCounts = {};
+            RELEASE_DATA.items.forEach(item => {
+                item.tags.forEach(tag => {
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                });
+            });
+            // Sort by count (descending) then alphabetically
+            return Object.entries(tagCounts)
+                .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        }
+
+        function renderTagFilters() {
+            const container = document.getElementById('tag-filters-container');
+            const tags = getAllTags();
+
+            container.innerHTML = tags.map(([tag, count]) => `
+                <button class="filter-tag-pill ${state.activeTag === tag ? 'active' : ''}" data-tag="${tag}">
+                    ${tag}
+                    <span class="filter-tag-count">${count}</span>
+                </button>
+            `).join('');
+
+            // Add click listeners
+            container.querySelectorAll('.filter-tag-pill').forEach(pill => {
+                pill.addEventListener('click', () => handleTagClick(pill.dataset.tag));
+            });
+        }
+
+        function updateTagFilterUI() {
+            // Update persistent filter pills
+            document.querySelectorAll('.filter-tag-pill').forEach(pill => {
+                pill.classList.toggle('active', pill.dataset.tag === state.activeTag);
+            });
+
+            // Update clear button visibility
+            const clearBtn = document.getElementById('clear-tag-filter');
+            clearBtn.classList.toggle('visible', state.activeTag !== null);
+        }
+
         // ========== TAG FILTERING ==========
         function handleTagClick(tagName) {
             const activeTagsSection = document.getElementById('active-tags');
@@ -1821,6 +1958,8 @@
             document.querySelectorAll('.tag-pill').forEach(pill => {
                 pill.classList.toggle('active', pill.dataset.tag === tagName);
             });
+
+            updateTagFilterUI();
         }
 
         function clearTagFilter() {
@@ -1831,6 +1970,8 @@
             document.querySelectorAll('.item-card').forEach(card => {
                 card.classList.remove('faded', 'highlighted');
             });
+
+            updateTagFilterUI();
             document.querySelectorAll('.tag-pill').forEach(pill => {
                 pill.classList.remove('active');
             });
@@ -1985,6 +2126,7 @@
 
         // ========== INIT ==========
         function init() {
+            renderTagFilters();
             renderMilestones();
             updateSummaryStats();
             setupEventListeners();
