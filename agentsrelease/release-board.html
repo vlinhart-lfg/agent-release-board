@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Board - Make AI Agents</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #4A44D4;
+            --primary-light: rgba(108, 99, 255, 0.1);
+            --success: #10B981;
+            --warning: #F59E0B;
+            --alert: #EF4444;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border: #E5E7EB;
+
+            --team-product: #6C63FF;
+            --team-marketing: #3B82F6;
+            --team-growth: #10B981;
+            --team-support: #F59E0B;
+
+            --status-on-track: #10B981;
+            --status-at-risk: #F59E0B;
+            --status-blocked: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .release-board {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* ========== HEADER ========== */
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-white);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .filter-btn {
+            padding: 8px 14px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ========== SUMMARY HEADER ========== */
+        .summary-header {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .summary-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .countdown-icon { background: var(--primary-light); color: var(--primary); }
+        .health-icon { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .items-icon { background: rgba(59, 130, 246, 0.1); color: var(--team-marketing); }
+        .risk-icon { background: rgba(239, 68, 68, 0.1); color: var(--alert); }
+
+        .summary-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .summary-detail {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .health-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .health-indicator.on-track { background: var(--status-on-track); }
+        .health-indicator.at-risk { background: var(--status-at-risk); }
+        .health-indicator.blocked { background: var(--status-blocked); }
+
+        .risk-value { color: var(--alert); }
+
+        /* ========== ACTIVE TAGS ========== */
+        .active-tags-section {
+            margin-bottom: 16px;
+            min-height: 24px;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .active-tags-section.visible {
+            opacity: 1;
+            background: var(--bg-white);
+            border-radius: 8px;
+            padding: 12px 16px;
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .active-tag-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .active-tag-pill {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-tag-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            opacity: 0.8;
+            padding: 0;
+        }
+
+        .clear-tag-btn:hover { opacity: 1; }
+
+        .tag-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        /* ========== MILESTONE COLUMNS ========== */
+        .milestones-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .milestone-column {
+            background: var(--bg-white);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .milestone-column.is-launch {
+            border: 2px solid var(--alert);
+        }
+
+        .milestone-header {
+            padding: 20px;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .milestone-column.is-launch .milestone-header {
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .milestone-date {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .milestone-column.is-launch .milestone-date {
+            color: var(--alert);
+        }
+
+        .milestone-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .milestone-column.is-launch .milestone-label {
+            color: var(--alert);
+            font-weight: 600;
+        }
+
+        .milestone-stats {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 12px;
+        }
+
+        .milestone-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+        }
+
+        .milestone-stat-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .milestone-body {
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        /* ========== TEAM SECTION ========== */
+        .team-section {
+            margin-bottom: 8px;
+        }
+
+        .team-section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+        .team-section-indicator {
+            width: 3px;
+            height: 16px;
+            border-radius: 2px;
+        }
+
+        .team-section-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .team-section-count {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        /* ========== ITEM CARDS ========== */
+        .item-card {
+            background: var(--bg-white);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .item-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .item-card.faded {
+            opacity: 0.2;
+        }
+
+        .item-card.highlighted {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .card-team-bar {
+            width: 4px;
+            height: 40px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .card-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-dot.on-track { background: var(--status-on-track); }
+        .status-dot.at-risk { background: var(--status-at-risk); }
+        .status-dot.blocked { background: var(--status-blocked); }
+
+        .card-id {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 2px;
+        }
+
+        .card-owner {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .tag-pill {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--bg-light);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .tag-pill:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tag-pill.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .card-progress {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--bg-light);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.on-track { background: var(--status-on-track); }
+        .progress-fill.at-risk { background: var(--status-at-risk); }
+        .progress-fill.blocked { background: var(--status-blocked); }
+
+        .progress-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            min-width: 32px;
+            text-align: right;
+        }
+
+        /* ========== CARD DETAIL MODAL ========== */
+        .card-detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .card-detail-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .card-detail-modal {
+            background: var(--bg-white);
+            border-radius: 16px;
+            width: 520px;
+            max-width: 90vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .card-detail-overlay.visible .card-detail-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--bg-light);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            padding: 24px 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .modal-status-badge.on-track {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--status-on-track);
+        }
+
+        .modal-status-badge.at-risk {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--status-at-risk);
+        }
+
+        .modal-status-badge.blocked {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--status-blocked);
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .modal-team {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .modal-body {
+            padding: 20px 24px 28px;
+        }
+
+        .modal-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-row:last-child {
+            border-bottom: none;
+        }
+
+        .modal-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            width: 100px;
+            flex-shrink: 0;
+        }
+
+        .modal-value {
+            font-size: 14px;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .modal-progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .modal-progress {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .modal-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 4px;
+        }
+
+        .modal-progress-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .modal-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .modal-tags .tag-pill {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+
+        .modal-dependencies {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .dependency-pill {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--team-marketing);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .dependency-pill:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .modal-description-text {
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.7;
+            margin-top: 8px;
+        }
+
+        .priority-badge {
+            display: inline-flex;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-badge.critical { background: rgba(239, 68, 68, 0.1); color: var(--alert); }
+        .priority-badge.high { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .priority-badge.medium { background: rgba(59, 130, 246, 0.1); color: var(--team-marketing); }
+        .priority-badge.low { background: rgba(156, 163, 175, 0.1); color: var(--text-muted); }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-team {
+            padding: 12px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1100px) {
+            .milestones-container {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-header {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .summary-header {
+                grid-template-columns: 1fr;
+            }
+
+            .board-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="release-board">
+        <!-- Header -->
+        <header class="board-header">
+            <div class="header-left">
+                <div class="logo">M</div>
+                <div>
+                    <h1 class="header-title">Release Board</h1>
+                    <p class="header-subtitle">Make AI Agents Launch</p>
+                </div>
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">All Teams</button>
+                <button class="filter-btn" data-filter="product">Product</button>
+                <button class="filter-btn" data-filter="marketing">Marketing</button>
+                <button class="filter-btn" data-filter="growth">Growth</button>
+                <button class="filter-btn" data-filter="support">Support</button>
+            </div>
+        </header>
+
+        <!-- Summary -->
+        <section class="summary-header">
+            <div class="summary-card">
+                <div class="summary-icon countdown-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="summary-value" id="countdown-days">22</div>
+                    <div class="summary-label">Days to Launch</div>
+                    <div class="summary-detail">February 2, 2026</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon health-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="summary-value">
+                        <span class="health-indicator" id="health-indicator"></span>
+                        <span id="health-status">On Track</span>
+                    </div>
+                    <div class="summary-label">Release Health</div>
+                    <div class="summary-detail" id="health-detail">75% complete</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon items-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="summary-value" id="total-items">17</div>
+                    <div class="summary-label">Total Items</div>
+                    <div class="summary-detail">4 teams</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon risk-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="summary-value risk-value" id="at-risk-count">3</div>
+                    <div class="summary-label">At Risk</div>
+                    <div class="summary-detail" id="blocked-detail">1 blocked</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Active Tags -->
+        <section class="active-tags-section" id="active-tags"></section>
+
+        <!-- Milestone Columns -->
+        <section class="milestones-container" id="milestones-container"></section>
+
+        <!-- Modal -->
+        <div class="card-detail-overlay" id="card-detail-overlay">
+            <div class="card-detail-modal" id="card-detail-modal"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const RELEASE_DATA = {
+            config: {
+                releaseName: "Make AI Agents",
+                milestones: [
+                    { date: "2026-01-16", label: "Alpha Ready", isLaunch: false },
+                    { date: "2026-01-28", label: "Beta Complete", isLaunch: false },
+                    { date: "2026-02-02", label: "LAUNCH DAY", isLaunch: true }
+                ],
+                teams: [
+                    { id: "product", name: "Product", color: "#6C63FF" },
+                    { id: "marketing", name: "Marketing", color: "#3B82F6" },
+                    { id: "growth", name: "Growth", color: "#10B981" },
+                    { id: "support", name: "Support", color: "#F59E0B" }
+                ]
+            },
+            items: [
+                // ========================================
+                // ===== BY JAN 16 (Alpha Ready) =========
+                // ========================================
+
+                // --- CONTEXT APP (Feature Flag) ---
+                {
+                    id: "CTX-001",
+                    title: "Create databases on all prod zones",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["context-app", "infrastructure", "database"],
+                    dependencies: [],
+                    owner: "Artemy Dmitriev",
+                    description: "Create databases on all production zones for the Context App behind a feature flag.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "CTX-002",
+                    title: "File names exchange between module and agent",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["context-app", "files", "agent"],
+                    dependencies: [],
+                    owner: "Pavel Kolman",
+                    description: "Figure out how to send and receive file names between the standalone module and the agent. Agent should be able to execute a search selecting a file name and a query.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "CTX-003",
+                    title: "Hide standalone module from normal search",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["context-app", "inspector"],
+                    dependencies: [],
+                    owner: "Marek Spiska",
+                    description: "Implement the logic of hiding the standalone module from the normal search (using a boolean flag in the manifest of the app, then inspector filters it).",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- INTERNAL CHAT ---
+                {
+                    id: "CHAT-001",
+                    title: "Streaming events",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["internal-chat", "streaming"],
+                    dependencies: [],
+                    owner: "David",
+                    description: "Implement streaming events for internal chat - one of two main features needed before shipping to users.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "CHAT-002",
+                    title: "Reset chat if mappings change",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["internal-chat", "mapping"],
+                    dependencies: [],
+                    owner: "David",
+                    description: "Implement resetting the chat if the mappings change - one of two main features needed before shipping to users.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "CHAT-003",
+                    title: "Internal chat minor improvements",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["internal-chat"],
+                    dependencies: ["CHAT-001", "CHAT-002"],
+                    owner: "David",
+                    description: "Minor improvements to internal chat functionality.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- LET AI DECIDE ---
+                {
+                    id: "AI-001",
+                    title: "Let AI Decide - testing popular apps",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "at-risk",
+                    tags: ["let-ai-decide", "testing", "local-agents"],
+                    dependencies: [],
+                    owner: "Vitek Linhart",
+                    description: "Key point for local agents - testing popular apps to ensure Let AI Decide works properly and supports 90% of cases. Many cases where Let AI Decide is not enabled (e.g., arrays). Report WIP: https://docs.google.com/document/d/1SvN0oClgRKcxw09n33JhKUMBORkXZmgBEdHxFu1qgyw/edit",
+                    progress: 0,
+                    priority: "critical"
+                },
+
+                // --- FILES ---
+                {
+                    id: "FILES-001",
+                    title: "Files PR review",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["files", "pr-review"],
+                    dependencies: [],
+                    owner: "Pavel Kolman",
+                    description: "Pavel Kolman dropped a FAT PR for Files feature - it seems to work but needs review and testing.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- MAPPING ---
+                {
+                    id: "MAP-001",
+                    title: "Ask for mapping if tool needs variable",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["mapping", "tools"],
+                    dependencies: [],
+                    owner: "David",
+                    description: "Implement asking for mapping if a tool needs a variable.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- CALL SUB SCENARIO MODULE ---
+                {
+                    id: "SUB-001",
+                    title: "Engine fetch scenario name + description",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["call-sub-scenario", "engine"],
+                    dependencies: [],
+                    owner: "Jan Eliáš",
+                    description: "Engine will fetch scenario name + description and pass it to the agent app when calling.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "SUB-002",
+                    title: "Module show/edit scenario name & description",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["call-sub-scenario", "ui"],
+                    dependencies: ["SUB-001"],
+                    owner: "Marek Spiska",
+                    description: "Module will show scenario name and description, also allow user to edit. Name and description will be mandatory so user needs to fill them.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- FIXES ---
+                {
+                    id: "FIX-001",
+                    title: "Fix agent output/reasoning interchange",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["fix", "reasoning", "agent"],
+                    dependencies: [],
+                    owner: "Pavel Kolman",
+                    description: "In reasoning: fix wrong interchange between agent output and agent reasoning.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "FIX-002",
+                    title: "Move search input to advanced config",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["fix", "knowledge", "ui"],
+                    dependencies: [],
+                    owner: "Pavel Kolman",
+                    description: "In Knowledge standalone module: move search input to advanced config.",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "FIX-003",
+                    title: "Fix Add Knowledge button not displaying",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "blocked",
+                    tags: ["fix", "knowledge", "ui"],
+                    dependencies: [],
+                    owner: "Marek Spiska",
+                    description: "Add Knowledge button is not displaying (only displays after adding and deleting the knowledge app).",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // ========================================
+                // ===== BY JAN 28 (Beta Complete) =======
+                // ========================================
+                // TODO: Add 28.1 items
+
+                // ========================================
+                // ===== BY FEB 2 (LAUNCH DAY) ===========
+                // ========================================
+
+                // --- LIBRARY OF AGENTS (Product Feature) ---
+                {
+                    id: "LOA-001",
+                    title: "Library of Agents",
+                    team: "product",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["library-of-agents", "feature", "launch", "critical-path"],
+                    dependencies: [],
+                    owner: "Product Team",
+                    description: "Library of Agents feature ready for launch - curated collection of pre-built AI agents for common use cases.",
+                    progress: 0,
+                    priority: "critical"
+                },
+
+                // --- WEB ---
+                {
+                    id: "WEB-001",
+                    title: "Landing page update",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["web", "landing-page", "launch"],
+                    dependencies: [],
+                    owner: "Michael",
+                    description: "Amend old Agents page: Hero video, hero animation, use case examples, interactive demo.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "WEB-002",
+                    title: "Library of Agents videos",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["web", "library-of-agents", "video"],
+                    dependencies: [],
+                    owner: "Michael",
+                    description: "9x videos/Hackathon videos for Library of Agents.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- PAID MEDIA ---
+                {
+                    id: "PAID-001",
+                    title: "Google ad campaign",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["paid-media", "google", "ads"],
+                    dependencies: [],
+                    owner: "Su",
+                    description: "Google ad campaign for launch.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PAID-002",
+                    title: "YouTube ads",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["paid-media", "youtube", "ads"],
+                    dependencies: [],
+                    owner: "Su",
+                    description: "YouTube advertising campaign.",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "PAID-003",
+                    title: "LinkedIn ads",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["paid-media", "linkedin", "ads"],
+                    dependencies: [],
+                    owner: "Su",
+                    description: "LinkedIn advertising campaign.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- BLOG/CONTENT ---
+                {
+                    id: "BLOG-001",
+                    title: "Launch blog post",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["blog", "content", "launch"],
+                    dependencies: [],
+                    owner: "Stuart",
+                    description: "\"Introducing the next-gen Make AI Agents\" - main launch announcement.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "BLOG-002",
+                    title: "Explainer blog post",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["blog", "content", "education"],
+                    dependencies: [],
+                    owner: "Stuart",
+                    description: "\"What AI Agents do (and don't do)\", Business use case descriptions, When to use Agents vs automation vs AI steps.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "BLOG-003",
+                    title: "Technical deep dive blog",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["blog", "content", "technical"],
+                    dependencies: [],
+                    owner: "Stuart",
+                    description: "\"Why we rebuilt AI Agents inside the canvas\", \"When to use Agents vs standard modules\", advanced docs & patterns, Visual reasoning, reuse, cost transparency.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "BLOG-004",
+                    title: "9x case study videos",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["content", "video", "case-studies"],
+                    dependencies: [],
+                    owner: "Peter T",
+                    description: "9x videos and case studies content.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- SOCIAL ---
+                {
+                    id: "SOC-001",
+                    title: "Launch announcement post",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["social", "launch", "announcement"],
+                    dependencies: [],
+                    owner: "Isabella",
+                    description: "Beta announcement post across social channels.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "SOC-002",
+                    title: "Short demo clips",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["social", "video", "demo"],
+                    dependencies: [],
+                    owner: "Isabella",
+                    description: "30–60s clips showing agent reasoning for social media.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "SOC-003",
+                    title: "Use case carousels",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["social", "use-cases"],
+                    dependencies: [],
+                    owner: "Isabella",
+                    description: "Simple \"Before / After Agents\" carousels for specific use case examples.",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "SOC-004",
+                    title: "LinkedIn thought leadership",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["social", "linkedin", "thought-leadership"],
+                    dependencies: [],
+                    owner: "Isabella",
+                    description: "\"The New AI Risk Isn't Accuracy…It's Losing Visibility\" - Black-box automation creates governance and compliance blind spots. \"Workflow Automation vs AI vs Agents: How Leaders Pick the Right Tool\".",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- COMMUNITY ---
+                {
+                    id: "COM-001",
+                    title: "Reddit launch post",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["community", "reddit", "launch"],
+                    dependencies: [],
+                    owner: "Michaela",
+                    description: "Launch post on Reddit (Open Beta announcement).",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "COM-002",
+                    title: "Webinar - Business framing",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["community", "webinar", "business"],
+                    dependencies: [],
+                    owner: "Michaela",
+                    description: "Webinar with business framing around operational impact and security for buyer audience.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "COM-003",
+                    title: "Webinar - How it works",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["community", "webinar", "technical"],
+                    dependencies: [],
+                    owner: "Michaela",
+                    description: "Technical webinar showing how agents work for hands-on users.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "COM-004",
+                    title: "Agent sharing challenge",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["community", "challenge", "engagement"],
+                    dependencies: [],
+                    owner: "Michaela",
+                    description: "Share your best Agent solution around 1 or more of the patterns OR the most requested use cases.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- EMAIL ---
+                {
+                    id: "EMAIL-001",
+                    title: "Launch email",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["email", "launch"],
+                    dependencies: [],
+                    owner: "Katerina",
+                    description: "Main launch email announcement.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "EMAIL-002",
+                    title: "Product newsletter",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["email", "newsletter"],
+                    dependencies: [],
+                    owner: "Katerina",
+                    description: "Product newsletter featuring AI Agents launch.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- INFLUENCERS ---
+                {
+                    id: "INF-001",
+                    title: "Influencers - short-form social demos",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "at-risk",
+                    tags: ["influencers", "social", "demo"],
+                    dependencies: [],
+                    owner: "Javi",
+                    description: "Short-form social demos from influencers.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "INF-002",
+                    title: "YouTube deep-dive videos",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["influencers", "youtube", "video"],
+                    dependencies: [],
+                    owner: "Javi",
+                    description: "\"Build AI agents you can trust with Make\" - Build + debug real agent workflows on YouTube.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "INF-003",
+                    title: "X threads with real builds",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["influencers", "twitter", "content"],
+                    dependencies: [],
+                    owner: "Javi",
+                    description: "X/Twitter threads with real builds and business use cases.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- PR ---
+                {
+                    id: "PR-001",
+                    title: "Hackathon PR",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["pr", "hackathon", "pre-launch"],
+                    dependencies: [],
+                    owner: "Dan",
+                    description: "Pre-launch Hackathon PR.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PR-002",
+                    title: "Launch thought leadership",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["pr", "thought-leadership", "launch"],
+                    dependencies: [],
+                    owner: "Dan",
+                    description: "Launch thought leadership on agentic automation.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PR-003",
+                    title: "Analyst brief",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["pr", "analyst", "post-launch"],
+                    dependencies: [],
+                    owner: "Dan",
+                    description: "Post-launch analyst brief.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- IN-PRODUCT ---
+                {
+                    id: "PROD-001",
+                    title: "Launch banner",
+                    team: "growth",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["in-product", "banner", "launch"],
+                    dependencies: [],
+                    owner: "Growth",
+                    description: "In-product launch banner.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PROD-002",
+                    title: "Demo videos from 9x",
+                    team: "growth",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["in-product", "video", "demo"],
+                    dependencies: [],
+                    owner: "Growth",
+                    description: "Demo videos from 9x integrated in-product.",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "PROD-003",
+                    title: "Prompts on complex scenarios",
+                    team: "growth",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["in-product", "prompts", "adoption"],
+                    dependencies: [],
+                    owner: "Growth",
+                    description: "Prompts on complex scenarios (5+ module scenarios). Notification to users with at least 1 LLM + router with at least 2 routes to consider building an AI Agent.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PROD-004",
+                    title: "Office hours",
+                    team: "growth",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["in-product", "office-hours", "support"],
+                    dependencies: [],
+                    owner: "PM/Growth",
+                    description: "Office hours for launch support.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- EVENTS ---
+                {
+                    id: "EVT-001",
+                    title: "Events coordination",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["events", "launch"],
+                    dependencies: [],
+                    owner: "Nikki",
+                    description: "Events coordination for launch.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- GTM ENABLEMENT ---
+                {
+                    id: "GTM-001",
+                    title: "Sales enablement session",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["gtm", "sales", "enablement"],
+                    dependencies: [],
+                    owner: "Mike R",
+                    description: "Internal sales enablement training session.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "GTM-002",
+                    title: "Sales enablement slides",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["gtm", "sales", "enablement"],
+                    dependencies: [],
+                    owner: "Mike R",
+                    description: "Sales enablement presentation slides.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "GTM-003",
+                    title: "1-pager - Expansion sales",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["gtm", "sales", "collateral"],
+                    dependencies: [],
+                    owner: "Mike R",
+                    description: "1-pager for expansion-focused sales (buyer audience).",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "GTM-004",
+                    title: "1-pager - Hands-on user",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["gtm", "sales", "collateral"],
+                    dependencies: [],
+                    owner: "Mike R",
+                    description: "1-pager for hands-on users.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- DOCUMENTATION ---
+                {
+                    id: "DOC-001",
+                    title: "Getting started guide",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "getting-started"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Getting started guide for AI Agents.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "DOC-002",
+                    title: "Release notes",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "release-notes"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Official release notes for launch.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "DOC-003",
+                    title: "When to use AI Agents guide",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "guide", "education"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Guide explaining when to use AI Agents vs other approaches.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "DOC-004",
+                    title: "Advanced patterns guide",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "guide", "advanced"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Advanced patterns and best practices guide for hands-on users.",
+                    progress: 0,
+                    priority: "high"
+                }
+            ]
+        };
+
+        // ========== STATE ==========
+        const state = {
+            activeTag: null,
+            activeTeamFilter: 'all'
+        };
+
+        // ========== UTILITIES ==========
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric' }).replace('/', '.');
+        }
+
+        function formatDateLong(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+
+        function daysBetween(start, end) {
+            return Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24));
+        }
+
+        function getTeamColor(teamId) {
+            const team = RELEASE_DATA.config.teams.find(t => t.id === teamId);
+            return team ? team.color : '#6B7280';
+        }
+
+        function getTeamName(teamId) {
+            const team = RELEASE_DATA.config.teams.find(t => t.id === teamId);
+            return team ? team.name : teamId;
+        }
+
+        function formatStatus(status) {
+            return { 'on-track': 'On Track', 'at-risk': 'At Risk', 'blocked': 'Blocked' }[status] || status;
+        }
+
+        // ========== RENDER MILESTONES ==========
+        function renderMilestones() {
+            const container = document.getElementById('milestones-container');
+            container.innerHTML = '';
+
+            RELEASE_DATA.config.milestones.forEach(milestone => {
+                const items = RELEASE_DATA.items.filter(i => i.milestone === milestone.date);
+                const onTrack = items.filter(i => i.status === 'on-track').length;
+                const atRisk = items.filter(i => i.status === 'at-risk').length;
+                const blocked = items.filter(i => i.status === 'blocked').length;
+
+                const col = document.createElement('div');
+                col.className = `milestone-column ${milestone.isLaunch ? 'is-launch' : ''}`;
+                col.dataset.date = milestone.date;
+
+                col.innerHTML = `
+                    <div class="milestone-header">
+                        <div class="milestone-date">${formatDate(milestone.date)}</div>
+                        <div class="milestone-label">${milestone.label}</div>
+                        <div class="milestone-stats">
+                            <span class="milestone-stat">
+                                <span class="milestone-stat-dot" style="background: var(--status-on-track);"></span>
+                                ${onTrack}
+                            </span>
+                            <span class="milestone-stat">
+                                <span class="milestone-stat-dot" style="background: var(--status-at-risk);"></span>
+                                ${atRisk}
+                            </span>
+                            <span class="milestone-stat">
+                                <span class="milestone-stat-dot" style="background: var(--status-blocked);"></span>
+                                ${blocked}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="milestone-body" data-milestone="${milestone.date}"></div>
+                `;
+
+                container.appendChild(col);
+
+                // Render items grouped by team
+                const body = col.querySelector('.milestone-body');
+                renderItemsByTeam(body, items);
+            });
+        }
+
+        function renderItemsByTeam(container, items) {
+            RELEASE_DATA.config.teams.forEach(team => {
+                const teamItems = items.filter(i => i.team === team.id);
+                if (teamItems.length === 0 && state.activeTeamFilter !== 'all' && state.activeTeamFilter !== team.id) return;
+
+                const section = document.createElement('div');
+                section.className = 'team-section';
+                section.dataset.team = team.id;
+
+                if (state.activeTeamFilter !== 'all' && state.activeTeamFilter !== team.id) {
+                    section.style.display = 'none';
+                }
+
+                section.innerHTML = `
+                    <div class="team-section-header">
+                        <div class="team-section-indicator" style="background: ${team.color};"></div>
+                        <span class="team-section-name">${team.name}</span>
+                        <span class="team-section-count">${teamItems.length}</span>
+                    </div>
+                `;
+
+                if (teamItems.length === 0) {
+                    section.innerHTML += `<div class="empty-team">No items</div>`;
+                } else {
+                    teamItems.forEach(item => {
+                        section.appendChild(createItemCard(item));
+                    });
+                }
+
+                container.appendChild(section);
+            });
+        }
+
+        function createItemCard(item) {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.dataset.id = item.id;
+            card.dataset.tags = item.tags.join(',');
+
+            if (state.activeTag && !item.tags.includes(state.activeTag)) {
+                card.classList.add('faded');
+            }
+            if (state.activeTag && item.tags.includes(state.activeTag)) {
+                card.classList.add('highlighted');
+            }
+
+            const teamColor = getTeamColor(item.team);
+
+            card.innerHTML = `
+                <div class="card-top">
+                    <div class="card-team-bar" style="background: ${teamColor};"></div>
+                    <div class="card-main">
+                        <div class="card-header">
+                            <span class="status-dot ${item.status}"></span>
+                            <span class="card-id">${item.id}</span>
+                        </div>
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-owner">${item.owner}</div>
+                    </div>
+                </div>
+                <div class="card-tags">
+                    ${item.tags.map(tag => `<span class="tag-pill ${state.activeTag === tag ? 'active' : ''}" data-tag="${tag}">${tag}</span>`).join('')}
+                </div>
+                <div class="card-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill ${item.status}" style="width: ${item.progress}%;"></div>
+                    </div>
+                    <span class="progress-text">${item.progress}%</span>
+                </div>
+            `;
+
+            card.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('tag-pill')) {
+                    openCardDetail(item.id);
+                }
+            });
+
+            return card;
+        }
+
+        // ========== TAG FILTERING ==========
+        function handleTagClick(tagName) {
+            const activeTagsSection = document.getElementById('active-tags');
+
+            if (state.activeTag === tagName) {
+                clearTagFilter();
+                return;
+            }
+
+            state.activeTag = tagName;
+            const tagCount = RELEASE_DATA.items.filter(item => item.tags.includes(tagName)).length;
+
+            activeTagsSection.innerHTML = `
+                <span class="active-tag-label">Filtering by tag:</span>
+                <span class="active-tag-pill">
+                    ${tagName}
+                    <span class="tag-count">${tagCount}</span>
+                    <button class="clear-tag-btn" onclick="clearTagFilter()">&times;</button>
+                </span>
+            `;
+            activeTagsSection.classList.add('visible');
+
+            document.querySelectorAll('.item-card').forEach(card => {
+                const cardTags = card.dataset.tags.split(',');
+                card.classList.toggle('faded', !cardTags.includes(tagName));
+                card.classList.toggle('highlighted', cardTags.includes(tagName));
+            });
+
+            document.querySelectorAll('.tag-pill').forEach(pill => {
+                pill.classList.toggle('active', pill.dataset.tag === tagName);
+            });
+        }
+
+        function clearTagFilter() {
+            state.activeTag = null;
+            document.getElementById('active-tags').innerHTML = '';
+            document.getElementById('active-tags').classList.remove('visible');
+
+            document.querySelectorAll('.item-card').forEach(card => {
+                card.classList.remove('faded', 'highlighted');
+            });
+            document.querySelectorAll('.tag-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+        }
+
+        // ========== TEAM FILTERING ==========
+        function handleTeamFilter(teamId) {
+            state.activeTeamFilter = teamId;
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === teamId);
+            });
+
+            document.querySelectorAll('.team-section').forEach(section => {
+                const show = teamId === 'all' || section.dataset.team === teamId;
+                section.style.display = show ? '' : 'none';
+            });
+        }
+
+        // ========== MODAL ==========
+        function openCardDetail(itemId) {
+            const item = RELEASE_DATA.items.find(i => i.id === itemId);
+            if (!item) return;
+
+            const overlay = document.getElementById('card-detail-overlay');
+            const modal = document.getElementById('card-detail-modal');
+            const team = RELEASE_DATA.config.teams.find(t => t.id === item.team);
+            const milestone = RELEASE_DATA.config.milestones.find(m => m.date === item.milestone);
+
+            modal.innerHTML = `
+                <button class="modal-close" onclick="closeCardDetail()">&times;</button>
+                <div class="modal-header">
+                    <div class="modal-status-badge ${item.status}">
+                        <span class="status-dot ${item.status}"></span>
+                        ${formatStatus(item.status)}
+                    </div>
+                    <h2 class="modal-title">${item.title}</h2>
+                    <p class="modal-team" style="color: ${team.color};">${team.name} &middot; ${item.id}</p>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-row">
+                        <span class="modal-label">Owner</span>
+                        <span class="modal-value">${item.owner}</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">Due Date</span>
+                        <span class="modal-value">${formatDateLong(item.milestone)} (${milestone.label})</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">Progress</span>
+                        <div class="modal-progress-container">
+                            <div class="modal-progress">
+                                <div class="modal-progress-bar" style="width: ${item.progress}%;"></div>
+                            </div>
+                            <span class="modal-progress-value">${item.progress}%</span>
+                        </div>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">Priority</span>
+                        <span class="priority-badge ${item.priority}">${item.priority}</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">Tags</span>
+                        <div class="modal-tags">
+                            ${item.tags.map(tag => `<span class="tag-pill" data-tag="${tag}" onclick="handleTagClick('${tag}'); closeCardDetail();">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                    ${item.dependencies.length > 0 ? `
+                        <div class="modal-row">
+                            <span class="modal-label">Depends On</span>
+                            <div class="modal-dependencies">
+                                ${item.dependencies.map(dep => `<span class="dependency-pill" onclick="closeCardDetail(); setTimeout(() => openCardDetail('${dep}'), 200);">${dep}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    <div class="modal-row">
+                        <span class="modal-label">Description</span>
+                        <p class="modal-description-text">${item.description}</p>
+                    </div>
+                </div>
+            `;
+
+            overlay.classList.add('visible');
+        }
+
+        function closeCardDetail() {
+            document.getElementById('card-detail-overlay').classList.remove('visible');
+        }
+
+        // ========== SUMMARY STATS ==========
+        function updateSummaryStats() {
+            const items = RELEASE_DATA.items;
+            const launchMilestone = RELEASE_DATA.config.milestones.find(m => m.isLaunch);
+
+            // Days to launch
+            const today = new Date().toISOString().split('T')[0];
+            const daysToLaunch = daysBetween(today, launchMilestone.date);
+            document.getElementById('countdown-days').textContent = Math.max(0, daysToLaunch);
+
+            // Risk counts
+            const atRisk = items.filter(i => i.status === 'at-risk').length;
+            const blocked = items.filter(i => i.status === 'blocked').length;
+            document.getElementById('at-risk-count').textContent = atRisk + blocked;
+            document.getElementById('blocked-detail').textContent = `${blocked} blocked`;
+
+            // Total
+            document.getElementById('total-items').textContent = items.length;
+
+            // Health
+            const avgProgress = Math.round(items.reduce((sum, i) => sum + i.progress, 0) / items.length);
+            document.getElementById('health-detail').textContent = `${avgProgress}% complete`;
+
+            const healthIndicator = document.getElementById('health-indicator');
+            const healthStatus = document.getElementById('health-status');
+
+            if (blocked > 0) {
+                healthIndicator.className = 'health-indicator blocked';
+                healthStatus.textContent = 'At Risk';
+            } else if (atRisk > 2) {
+                healthIndicator.className = 'health-indicator at-risk';
+                healthStatus.textContent = 'At Risk';
+            } else {
+                healthIndicator.className = 'health-indicator on-track';
+                healthStatus.textContent = 'On Track';
+            }
+        }
+
+        // ========== EVENT LISTENERS ==========
+        function setupEventListeners() {
+            // Tag clicks
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tag-pill') && !e.target.closest('.modal-tags')) {
+                    e.stopPropagation();
+                    handleTagClick(e.target.dataset.tag);
+                }
+            });
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleTeamFilter(btn.dataset.filter));
+            });
+
+            // Modal close
+            document.getElementById('card-detail-overlay').addEventListener('click', (e) => {
+                if (e.target.id === 'card-detail-overlay') closeCardDetail();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeCardDetail();
+            });
+        }
+
+        // ========== INIT ==========
+        function init() {
+            renderMilestones();
+            updateSummaryStats();
+            setupEventListeners();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
