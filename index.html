@@ -2757,19 +2757,19 @@
                 journeyView.classList.add('active');
                 boardName.textContent = 'Horizontal';
                 teamFilterGroup.style.display = 'none';
-                audienceFilterGroup.style.display = '';
+                audienceFilterGroup.style.display = 'flex';
                 renderUserJourneyView();
             } else if (boardId === 'user-journey') {
                 funnelView.classList.add('active');
                 boardName.textContent = 'User Journey';
                 teamFilterGroup.style.display = 'none';
-                audienceFilterGroup.style.display = '';
+                audienceFilterGroup.style.display = 'flex';
                 renderUserJourneyFunnel();
             } else if (boardId === 'journey-map') {
                 journeyMapView.classList.add('active');
                 boardName.textContent = 'Journey Map';
                 teamFilterGroup.style.display = 'none';
-                audienceFilterGroup.style.display = '';
+                audienceFilterGroup.style.display = 'flex';
                 renderJourneyMapView();
             }
         }
