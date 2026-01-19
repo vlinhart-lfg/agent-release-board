@@ -1555,30 +1555,22 @@
         }
 
         .journey-map-table {
-            display: table;
             min-width: 100%;
+        }
+
+        .journey-map-actual-table {
+            width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
-        .journey-map-row {
-            display: table-row;
-        }
-
-        .journey-map-cell {
-            display: table-cell;
-            border: 1px solid var(--border);
-            padding: 12px;
-            vertical-align: top;
-            min-width: 160px;
-        }
-
-        .journey-map-row-label {
-            display: table-cell;
+        .row-label-cell {
             border: 1px solid var(--border);
             padding: 16px;
             font-weight: 600;
             background: var(--bg-light);
             min-width: 100px;
+            width: 100px;
             vertical-align: middle;
             text-align: center;
             color: var(--text-secondary);
@@ -1586,7 +1578,6 @@
         }
 
         .phase-header-cell {
-            display: table-cell;
             text-align: center;
             color: white;
             font-weight: 700;
@@ -1600,7 +1591,6 @@
         .phase-header-cell.optimising { background: #10B981; }
 
         .touchpoint-header-cell {
-            display: table-cell;
             text-align: center;
             font-size: 13px;
             font-weight: 600;
@@ -1612,12 +1602,10 @@
         }
 
         .journey-map-items-cell {
-            display: table-cell;
             border: 1px solid var(--border);
             padding: 12px;
             vertical-align: top;
             min-width: 160px;
-            min-height: 120px;
         }
 
         .journey-map-items-cell.drag-over {
@@ -3081,57 +3069,57 @@
                 return tp ? tp.label : id;
             }
 
-            // Build the table HTML
-            let html = '';
+            // Build using actual HTML table for proper colspan support
+            let html = '<table class="journey-map-actual-table">';
 
-            // Row 1: Stage headers
-            html += '<div class="journey-map-row journey-map-header-row">';
-            html += '<div class="journey-map-cell row-label"></div>'; // Empty corner cell
+            // Row 1: Stage headers with colspan
+            html += '<thead><tr>';
+            html += '<th class="row-label-cell"></th>'; // Empty corner cell
 
             USER_JOURNEY_STAGES.forEach(stage => {
                 const colspan = colspans[stage.id];
-                html += `<div class="phase-header-cell ${stage.id}" style="min-width: ${colspan * 160}px;">${stage.label}</div>`;
+                html += `<th colspan="${colspan}" class="phase-header-cell ${stage.id}">${stage.label}</th>`;
             });
-            html += '</div>';
+            html += '</tr>';
 
             // Row 2: Touchpoint headers
-            html += '<div class="journey-map-row journey-map-touchpoint-row">';
-            html += '<div class="journey-map-cell row-label">Touchpoint</div>';
+            html += '<tr>';
+            html += '<th class="row-label-cell">Touchpoint</th>';
 
             USER_JOURNEY_STAGES.forEach(stage => {
                 const touchpoints = stageTouchpoints[stage.id];
                 if (touchpoints.length === 0) {
-                    html += `<div class="touchpoint-header-cell">-</div>`;
+                    html += `<th class="touchpoint-header-cell">-</th>`;
                 } else {
                     touchpoints.forEach(tpId => {
-                        html += `<div class="touchpoint-header-cell">${getTouchpointLabel(tpId)}</div>`;
+                        html += `<th class="touchpoint-header-cell">${getTouchpointLabel(tpId)}</th>`;
                     });
                 }
             });
-            html += '</div>';
+            html += '</tr></thead>';
 
             // Row 3: Items
-            html += '<div class="journey-map-row journey-map-items-row">';
-            html += '<div class="journey-map-cell row-label">Items</div>';
+            html += '<tbody><tr>';
+            html += '<td class="row-label-cell">Items</td>';
 
             USER_JOURNEY_STAGES.forEach(stage => {
                 const touchpoints = stageTouchpoints[stage.id];
                 if (touchpoints.length === 0) {
-                    html += `<div class="journey-map-items-cell" data-stage="${stage.id}" data-touchpoint="none">
+                    html += `<td class="journey-map-items-cell" data-stage="${stage.id}" data-touchpoint="none">
                         <div class="journey-map-empty">No items</div>
-                    </div>`;
+                    </td>`;
                 } else {
                     touchpoints.forEach(tpId => {
                         const items = stageData[stage.id][tpId] || [];
-                        html += `<div class="journey-map-items-cell" data-stage="${stage.id}" data-touchpoint="${tpId}">`;
+                        html += `<td class="journey-map-items-cell" data-stage="${stage.id}" data-touchpoint="${tpId}">`;
                         items.forEach(item => {
                             html += renderJourneyMapItem(item);
                         });
-                        html += '</div>';
+                        html += '</td>';
                     });
                 }
             });
-            html += '</div>';
+            html += '</tr></tbody></table>';
 
             container.innerHTML = html;
 
