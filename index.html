@@ -189,11 +189,6 @@
             color: var(--primary);
         }
 
-        .board-option-icon.post-release {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-
         .board-option-text {
             flex: 1;
         }
@@ -207,15 +202,6 @@
         .board-option-desc {
             font-size: 12px;
             color: var(--text-muted);
-        }
-
-        /* ========== POST-RELEASE BOARD ========== */
-        .post-release-board {
-            display: none;
-        }
-
-        .post-release-board.active {
-            display: block;
         }
 
         .release-board-content {
@@ -1324,17 +1310,6 @@
                                     <div class="board-option-desc">Pre-launch milestones</div>
                                 </div>
                             </div>
-                            <div class="board-option" data-board="post-release">
-                                <div class="board-option-icon post-release">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                    </svg>
-                                </div>
-                                <div class="board-option-text">
-                                    <div class="board-option-title">Post-Release Board</div>
-                                    <div class="board-option-desc">Month 1 & Exploratory</div>
-                                </div>
-                            </div>
                             <div class="board-option" data-board="journey">
                                 <div class="board-option-icon journey">
                                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1431,63 +1406,6 @@
 
         <!-- Milestone Columns -->
         <section class="milestones-container" id="milestones-container"></section>
-        </div>
-
-        <!-- Post-Release Board Content -->
-        <div class="post-release-board" id="post-release-board">
-            <!-- Phase 1: First Month -->
-            <section class="phase-section">
-                <div class="phase-header">
-                    <div class="phase-icon month-1">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="phase-title">1st Month Post-Release</h2>
-                        <p class="phase-subtitle">Feb 2 - Mar 2, 2026 | Critical monitoring & iteration</p>
-                    </div>
-                </div>
-                <table class="phase-table" id="month-1-table">
-                    <thead>
-                        <tr>
-                            <th>Initiative</th>
-                            <th>Team</th>
-                            <th>Status</th>
-                            <th>Owner</th>
-                            <th>Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="month-1-tbody"></tbody>
-                </table>
-            </section>
-
-            <!-- Phase 2: Exploratory -->
-            <section class="phase-section">
-                <div class="phase-header">
-                    <div class="phase-icon exploratory">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="phase-title">Exploratory Phase</h2>
-                        <p class="phase-subtitle">Mar 2026+ | Future improvements & experiments</p>
-                    </div>
-                </div>
-                <table class="phase-table" id="exploratory-table">
-                    <thead>
-                        <tr>
-                            <th>Initiative</th>
-                            <th>Team</th>
-                            <th>Status</th>
-                            <th>Owner</th>
-                            <th>Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="exploratory-tbody"></tbody>
-                </table>
-            </section>
         </div>
 
         <!-- Horizontal View -->
@@ -2450,36 +2368,6 @@
             ]
         };
 
-        // ========== POST-RELEASE DATA ==========
-        const POST_RELEASE_DATA = {
-            month1: [
-                { id: "PR-M1-001", title: "Bug triage & hotfixes", team: "product", status: "planned", owner: "Engineering", notes: "Daily monitoring of critical issues" },
-                { id: "PR-M1-002", title: "Performance monitoring", team: "product", status: "planned", owner: "Engineering", notes: "Track response times, error rates" },
-                { id: "PR-M1-003", title: "User feedback collection", team: "product", status: "planned", owner: "Vitek", notes: "Intercom, support tickets, NPS" },
-                { id: "PR-M1-004", title: "Feature usage analytics", team: "growth", status: "planned", owner: "Growth", notes: "Adoption rates, engagement metrics" },
-                { id: "PR-M1-005", title: "Support ticket analysis", team: "support", status: "planned", owner: "Support Lead", notes: "Common issues, documentation gaps" },
-                { id: "PR-M1-006", title: "Community engagement", team: "marketing", status: "planned", owner: "Michaela", notes: "Forum posts, success stories" },
-                { id: "PR-M1-007", title: "Quick wins implementation", team: "product", status: "planned", owner: "Engineering", notes: "Low-effort, high-impact improvements" },
-                { id: "PR-M1-008", title: "Influencer follow-up content", team: "marketing", status: "planned", owner: "Javi", notes: "Results & case studies" },
-                { id: "PR-M1-009", title: "Webinar series planning", team: "marketing", status: "planned", owner: "Katerina", notes: "Deep-dive sessions" },
-                { id: "PR-M1-010", title: "Documentation updates", team: "support", status: "planned", owner: "Ella", notes: "Based on common questions" }
-            ],
-            exploratory: [
-                { id: "PR-EX-001", title: "Agent marketplace exploration", team: "product", status: "not-started", owner: "Product", notes: "Community-built agents" },
-                { id: "PR-EX-002", title: "Advanced debugging tools", team: "product", status: "not-started", owner: "Engineering", notes: "Step-through execution, breakpoints" },
-                { id: "PR-EX-003", title: "Multi-agent orchestration", team: "product", status: "not-started", owner: "Product", notes: "Agents calling other agents" },
-                { id: "PR-EX-004", title: "Enterprise features", team: "product", status: "not-started", owner: "Product", notes: "SSO, audit logs, compliance" },
-                { id: "PR-EX-005", title: "Partner integrations", team: "growth", status: "not-started", owner: "Partnerships", notes: "Deep integrations with key platforms" },
-                { id: "PR-EX-006", title: "Agent templates library expansion", team: "product", status: "not-started", owner: "Product", notes: "Industry-specific templates" },
-                { id: "PR-EX-007", title: "AI model selection", team: "product", status: "not-started", owner: "Engineering", notes: "Multiple LLM provider support" },
-                { id: "PR-EX-008", title: "Agent analytics dashboard", team: "product", status: "not-started", owner: "Product", notes: "Cost tracking, performance insights" },
-                { id: "PR-EX-009", title: "Certification program", team: "support", status: "not-started", owner: "Education", notes: "Make AI Agents certification" },
-                { id: "PR-EX-010", title: "API v3 planning", team: "product", status: "not-started", owner: "Engineering", notes: "Based on developer feedback" },
-                { id: "PR-EX-011", title: "System prompt enhancer/improver", team: "product", status: "not-started", owner: "Product", notes: "AI-assisted prompt optimization and refinement tools" },
-                { id: "PR-EX-012", title: "Chat advanced settings", team: "product", status: "not-started", owner: "Product", notes: "Open up chat module to more configuration options" }
-            ]
-        };
-
         // ========== JOURNEY VIEW DATA ==========
         const JOURNEY_STAGES = [
             { id: 'discovery', label: 'Discovery', description: 'Pre-launch awareness building' },
@@ -2543,16 +2431,11 @@
             return { 'on-track': 'On Track', 'at-risk': 'At Risk', 'blocked': 'Blocked' }[status] || status;
         }
 
-        function formatPostReleaseStatus(status) {
-            return { 'planned': 'Planned', 'in-progress': 'In Progress', 'not-started': 'Not Started' }[status] || status;
-        }
-
         // ========== BOARD SWITCHING ==========
         function switchBoard(boardId) {
             state.currentBoard = boardId;
 
             const releaseContent = document.getElementById('release-board-content');
-            const postReleaseContent = document.getElementById('post-release-board');
             const journeyView = document.getElementById('user-journey-view');
             const boardName = document.getElementById('current-board-name');
             const teamFilterGroup = document.getElementById('team-filter-group');
@@ -2567,18 +2450,12 @@
 
             // Hide all views first
             releaseContent.classList.add('hidden');
-            postReleaseContent.classList.remove('active');
             journeyView.classList.remove('active');
 
             if (boardId === 'release') {
                 releaseContent.classList.remove('hidden');
                 boardName.textContent = 'Release Board';
                 teamFilterGroup.style.display = '';
-            } else if (boardId === 'post-release') {
-                postReleaseContent.classList.add('active');
-                boardName.textContent = 'Post-Release Board';
-                teamFilterGroup.style.display = 'none';
-                renderPostReleaseTables();
             } else if (boardId === 'journey') {
                 journeyView.classList.add('active');
                 boardName.textContent = 'Horizontal';
@@ -2607,39 +2484,6 @@
             document.addEventListener('click', () => {
                 selector.classList.remove('open');
             });
-        }
-
-        // ========== POST-RELEASE TABLES ==========
-        function renderPostReleaseTables() {
-            renderPostReleaseTable('month-1-tbody', POST_RELEASE_DATA.month1);
-            renderPostReleaseTable('exploratory-tbody', POST_RELEASE_DATA.exploratory);
-        }
-
-        function renderPostReleaseTable(tbodyId, data) {
-            const tbody = document.getElementById(tbodyId);
-            tbody.innerHTML = data.map(item => {
-                const teamColor = getTeamColor(item.team);
-                const teamName = getTeamName(item.team);
-                return `
-                    <tr>
-                        <td>
-                            <strong>${item.title}</strong>
-                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${item.id}</div>
-                        </td>
-                        <td>
-                            <span class="table-team-badge" style="background: ${teamColor}15; color: ${teamColor};">
-                                <span class="table-team-dot" style="background: ${teamColor};"></span>
-                                ${teamName}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="table-status ${item.status}">${formatPostReleaseStatus(item.status)}</span>
-                        </td>
-                        <td>${item.owner}</td>
-                        <td style="color: var(--text-secondary); font-size: 13px;">${item.notes}</td>
-                    </tr>
-                `;
-            }).join('');
         }
 
         // ========== USER JOURNEY VIEW ==========
