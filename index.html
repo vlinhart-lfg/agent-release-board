@@ -348,6 +348,10 @@
             border: 1px solid var(--border);
         }
 
+        .audience-filter-group {
+            display: none; /* Hidden by default, shown on journey views */
+        }
+
         .filter-btn {
             padding: 8px 14px;
             border: none;
@@ -1757,6 +1761,11 @@
                 <button class="filter-btn" data-filter="growth">Growth</button>
                 <button class="filter-btn" data-filter="support">Support</button>
             </div>
+            <div class="filter-group audience-filter-group" id="audience-filter-group">
+                <button class="filter-btn active" data-audience="all">All</button>
+                <button class="filter-btn" data-audience="new">New Users</button>
+                <button class="filter-btn" data-audience="existing">Existing Users</button>
+            </div>
         </header>
 
         <!-- Release Board Content -->
@@ -2596,6 +2605,27 @@
             optimising: ['advanced', 'challenge', 'global', 'local']
         };
 
+        // Touchpoint audience categorization (new vs existing users)
+        const CHANNEL_AUDIENCE = {
+            // New Users (Awareness & Acquisition)
+            'web': 'new',
+            'blog': 'new',
+            'social': 'new',
+            'paid': 'new',
+            'influencers': 'new',
+            'email': 'new',
+            'design': 'new',
+
+            // Existing Users (Activation & Retention)
+            'in-product': 'existing',
+            'docs': 'existing',
+            'academy': 'existing',
+            'product': 'existing',
+
+            // Both
+            'community': 'both'
+        };
+
         // ========== STATE ==========
         // Load stage overrides from URL hash first, then localStorage
         function loadStageOverrides() {
@@ -2646,8 +2676,22 @@
             activeTag: null,
             activeTeamFilter: 'all',
             currentBoard: 'release',
-            stageOverrides: loadStageOverrides() // { itemId: 'discovery' | 'experimenting' | 'optimising' }
+            stageOverrides: loadStageOverrides(), // { itemId: 'discovery' | 'experimenting' | 'optimising' }
+            audienceFilter: 'all' // 'all' | 'new' | 'existing'
         };
+
+        // Get items filtered by audience
+        function getFilteredItems() {
+            if (state.audienceFilter === 'all') return RELEASE_DATA.items;
+
+            return RELEASE_DATA.items.filter(item => {
+                const touchpoint = getTouchpointForItem(item);
+                if (!touchpoint) return state.audienceFilter === 'all';
+
+                const audience = CHANNEL_AUDIENCE[touchpoint.id] || 'new';
+                return audience === state.audienceFilter || audience === 'both';
+            });
+        }
 
         // ========== UTILITIES ==========
         function formatDate(dateStr) {
@@ -2688,6 +2732,7 @@
             const journeyMapView = document.getElementById('journey-map-view');
             const boardName = document.getElementById('current-board-name');
             const teamFilterGroup = document.getElementById('team-filter-group');
+            const audienceFilterGroup = document.getElementById('audience-filter-group');
 
             // Update dropdown
             document.querySelectorAll('.board-option').forEach(opt => {
@@ -2707,20 +2752,24 @@
                 releaseContent.classList.remove('hidden');
                 boardName.textContent = 'Release Board';
                 teamFilterGroup.style.display = '';
+                audienceFilterGroup.style.display = 'none';
             } else if (boardId === 'journey') {
                 journeyView.classList.add('active');
                 boardName.textContent = 'Horizontal';
                 teamFilterGroup.style.display = 'none';
+                audienceFilterGroup.style.display = '';
                 renderUserJourneyView();
             } else if (boardId === 'user-journey') {
                 funnelView.classList.add('active');
                 boardName.textContent = 'User Journey';
                 teamFilterGroup.style.display = 'none';
+                audienceFilterGroup.style.display = '';
                 renderUserJourneyFunnel();
             } else if (boardId === 'journey-map') {
                 journeyMapView.classList.add('active');
                 boardName.textContent = 'Journey Map';
                 teamFilterGroup.style.display = 'none';
+                audienceFilterGroup.style.display = '';
                 renderJourneyMapView();
             }
         }
@@ -2759,6 +2808,7 @@
 
         function renderUserJourneyView() {
             const container = document.getElementById('touchpoints-grid');
+            const items = getFilteredItems();
 
             // Group items by touchpoint
             const itemsByTouchpoint = {};
@@ -2766,7 +2816,7 @@
                 itemsByTouchpoint[tp.id] = [];
             });
 
-            RELEASE_DATA.items.forEach(item => {
+            items.forEach(item => {
                 const touchpoint = getTouchpointForItem(item);
                 if (touchpoint && itemsByTouchpoint[touchpoint.id]) {
                     itemsByTouchpoint[touchpoint.id].push(item);
@@ -2885,6 +2935,7 @@
 
         function renderJourneyColumns() {
             const container = document.getElementById('journey-columns');
+            const filteredItems = getFilteredItems();
 
             // Group items by journey stage
             const itemsByStage = {
@@ -2893,7 +2944,7 @@
                 optimising: []
             };
 
-            RELEASE_DATA.items.forEach(item => {
+            filteredItems.forEach(item => {
                 const stage = getJourneyStageForItem(item);
                 itemsByStage[stage].push(item);
             });
@@ -3019,6 +3070,7 @@
         // ========== JOURNEY MAP VIEW ==========
         function renderJourneyMapView() {
             const container = document.getElementById('journey-map-table');
+            const filteredItems = getFilteredItems();
 
             // Group items by stage, then by touchpoint
             const stageData = {
@@ -3028,7 +3080,7 @@
             };
 
             // Track which touchpoints have items in each stage
-            RELEASE_DATA.items.forEach(item => {
+            filteredItems.forEach(item => {
                 const stage = getJourneyStageForItem(item);
                 const touchpoint = getTouchpointForItem(item);
                 const touchpointId = touchpoint ? touchpoint.id : 'other';
@@ -3439,7 +3491,7 @@
         function handleTeamFilter(teamId) {
             state.activeTeamFilter = teamId;
 
-            document.querySelectorAll('.filter-btn').forEach(btn => {
+            document.querySelectorAll('#team-filter-group .filter-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.filter === teamId);
             });
 
@@ -3447,6 +3499,26 @@
                 const show = teamId === 'all' || section.dataset.team === teamId;
                 section.style.display = show ? '' : 'none';
             });
+        }
+
+        // ========== AUDIENCE FILTERING ==========
+        function handleAudienceFilter(audience) {
+            state.audienceFilter = audience;
+
+            // Update button states
+            document.querySelectorAll('#audience-filter-group .filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.audience === audience);
+            });
+
+            // Re-render the current view
+            const board = state.currentBoard;
+            if (board === 'journey-map') {
+                renderJourneyMapView();
+            } else if (board === 'user-journey') {
+                renderUserJourneyFunnel();
+            } else if (board === 'journey') {
+                renderUserJourneyView();
+            }
         }
 
         // ========== MODAL ==========
@@ -3567,9 +3639,14 @@
                 }
             });
 
-            // Filter buttons
-            document.querySelectorAll('.filter-btn').forEach(btn => {
+            // Team filter buttons
+            document.querySelectorAll('#team-filter-group .filter-btn').forEach(btn => {
                 btn.addEventListener('click', () => handleTeamFilter(btn.dataset.filter));
+            });
+
+            // Audience filter buttons
+            document.querySelectorAll('#audience-filter-group .filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleAudienceFilter(btn.dataset.audience));
             });
 
             // Modal close
