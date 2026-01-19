@@ -1112,6 +1112,190 @@
                 gap: 16px;
             }
         }
+
+        /* ========== USER JOURNEY VIEW ========== */
+        .user-journey-view {
+            display: none;
+            background: var(--bg-white);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .user-journey-view.active {
+            display: block;
+        }
+
+        .journey-scroll-container {
+            overflow-x: auto;
+            padding: 0;
+        }
+
+        .touchpoints-grid {
+            display: flex;
+            min-width: max-content;
+        }
+
+        .touchpoint-column {
+            min-width: 280px;
+            width: 280px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .touchpoint-column:last-child {
+            border-right: none;
+        }
+
+        .touchpoint-header {
+            padding: 16px;
+            background: var(--bg-light);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .touchpoint-header-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .touchpoint-color-bar {
+            width: 4px;
+            height: 40px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .touchpoint-info {
+            flex: 1;
+        }
+
+        .touchpoint-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .touchpoint-count {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .touchpoint-items {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .journey-item-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .journey-item-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .journey-item-card.faded {
+            opacity: 0.2;
+        }
+
+        .journey-item-card.highlighted {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+        }
+
+        .journey-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .journey-card-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .journey-card-status.on-track { background: var(--status-on-track); }
+        .journey-card-status.at-risk { background: var(--status-at-risk); }
+        .journey-card-status.blocked { background: var(--status-blocked); }
+
+        .journey-card-id {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .journey-card-milestone {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-left: auto;
+            background: var(--bg-white);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .journey-card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+
+        .journey-card-owner {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .journey-card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .journey-card-tag {
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 500;
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .touchpoint-empty {
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        /* Journey view icon for dropdown */
+        .board-option-icon.journey {
+            background: rgba(249, 115, 22, 0.1);
+            color: #F97316;
+        }
     </style>
 </head>
 <body>
@@ -1149,6 +1333,17 @@
                                 <div class="board-option-text">
                                     <div class="board-option-title">Post-Release Board</div>
                                     <div class="board-option-desc">Month 1 & Exploratory</div>
+                                </div>
+                            </div>
+                            <div class="board-option" data-board="journey">
+                                <div class="board-option-icon journey">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                    </svg>
+                                </div>
+                                <div class="board-option-text">
+                                    <div class="board-option-title">User Journey</div>
+                                    <div class="board-option-desc">Touchpoints view</div>
                                 </div>
                             </div>
                         </div>
@@ -1293,6 +1488,13 @@
                     <tbody id="exploratory-tbody"></tbody>
                 </table>
             </section>
+        </div>
+
+        <!-- User Journey View -->
+        <div class="user-journey-view" id="user-journey-view">
+            <div class="journey-scroll-container">
+                <div class="touchpoints-grid" id="touchpoints-grid"></div>
+            </div>
         </div>
 
         <!-- Modal -->
@@ -2095,6 +2297,88 @@
                     description: "Advanced implementation patterns documentation.",
                     progress: 0,
                     priority: "high"
+                },
+                {
+                    id: "DOC-005",
+                    title: "Knowledge documentation",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "knowledge", "guide"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Documentation for Knowledge feature in AI Agents.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "DOC-006",
+                    title: "Context documentation",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "context", "guide"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Documentation for Context feature in AI Agents.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "DOC-007",
+                    title: "Files as input documentation",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "files", "input", "guide"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Documentation for using files as input in AI Agents.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "DOC-008",
+                    title: "Global to Local page update",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "global", "local", "update"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Update documentation page for Global to Local agents transition.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- PRODUCT FEATURES ---
+                {
+                    id: "PRD-001",
+                    title: "Library of Agents",
+                    team: "product",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["product-feature", "library", "launch"],
+                    dependencies: [],
+                    owner: "Product Team",
+                    description: "Launch the Library of Agents feature with pre-built agent templates.",
+                    progress: 0,
+                    priority: "critical"
+                },
+
+                // --- ACADEMY ---
+                {
+                    id: "ACD-001",
+                    title: "Agent Engineering Course",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["academy", "course", "education"],
+                    dependencies: [],
+                    owner: "Academy Team",
+                    description: "Comprehensive course on agent engineering - building, testing, and deploying AI agents.",
+                    progress: 0,
+                    priority: "high"
                 }
             ]
         };
@@ -2128,6 +2412,33 @@
                 { id: "PR-EX-012", title: "Chat advanced settings", team: "product", status: "not-started", owner: "Product", notes: "Open up chat module to more configuration options" }
             ]
         };
+
+        // ========== JOURNEY VIEW DATA ==========
+        const JOURNEY_STAGES = [
+            { id: 'discovery', label: 'Discovery', description: 'Pre-launch awareness building' },
+            { id: 'awareness', label: 'Awareness', description: 'Launch announcement phase' },
+            { id: 'launch-day', label: 'Launch Day', description: 'Feb 2, 2026 activities' },
+            { id: 'first-week', label: 'First Week', description: 'Post-launch momentum' },
+            { id: 'first-month', label: 'First Month', description: 'Sustained engagement' }
+        ];
+
+        const CHANNELS = [
+            { id: 'product', label: 'Product', tags: ['product-feature', 'library', 'feature'], color: '#6C63FF' },
+            { id: 'web', label: 'Web', tags: ['web', 'landing-page', 'interactive'], color: '#6366F1' },
+            { id: 'blog', label: 'Blog', tags: ['blog', 'content', 'explainer', 'success-story'], color: '#8B5CF6' },
+            { id: 'social', label: 'Social', tags: ['social', 'linkedin', 'twitter', 'reddit', 'threads', 'announcement'], color: '#EC4899' },
+            { id: 'paid', label: 'Paid Media', tags: ['paid-media', 'google', 'youtube', 'ads'], color: '#F59E0B' },
+            { id: 'email', label: 'Email', tags: ['email', 'newsletter'], color: '#10B981' },
+            { id: 'community', label: 'Community', tags: ['community', 'challenge', 'webinar'], color: '#06B6D4' },
+            { id: 'influencers', label: 'Influencers', tags: ['influencers', 'deep-dive'], color: '#F97316' },
+            { id: 'pr', label: 'PR', tags: ['pr', 'press', 'pitch', 'media', 'outreach', 'analyst'], color: '#EF4444' },
+            { id: 'in-product', label: 'In-Product', tags: ['in-product', 'banner', 'prompts', 'adoption'], color: '#84CC16' },
+            { id: 'events', label: 'Events', tags: ['events', 'enterprise', 'executive', 'conference', 'hackathon'], color: '#A855F7' },
+            { id: 'docs', label: 'Docs', tags: ['docs', 'onboarding', 'guide', 'release-notes'], color: '#64748B' },
+            { id: 'sales', label: 'Sales', tags: ['sales-enablement', 'sales', 'one-pager', 'competitive', 'training'], color: '#0EA5E9' },
+            { id: 'design', label: 'Design', tags: ['design', 'creative', 'visuals', 'video', 'demo'], color: '#F472B6' },
+            { id: 'academy', label: 'Academy', tags: ['academy', 'course', 'training', 'education'], color: '#14B8A6' }
+        ];
 
         // ========== STATE ==========
         const state = {
@@ -2175,6 +2486,7 @@
 
             const releaseContent = document.getElementById('release-board-content');
             const postReleaseContent = document.getElementById('post-release-board');
+            const journeyView = document.getElementById('user-journey-view');
             const boardName = document.getElementById('current-board-name');
             const teamFilterGroup = document.getElementById('team-filter-group');
 
@@ -2186,17 +2498,25 @@
             // Close dropdown
             document.getElementById('board-selector').classList.remove('open');
 
+            // Hide all views first
+            releaseContent.classList.add('hidden');
+            postReleaseContent.classList.remove('active');
+            journeyView.classList.remove('active');
+
             if (boardId === 'release') {
                 releaseContent.classList.remove('hidden');
-                postReleaseContent.classList.remove('active');
                 boardName.textContent = 'Release Board';
                 teamFilterGroup.style.display = '';
-            } else {
-                releaseContent.classList.add('hidden');
+            } else if (boardId === 'post-release') {
                 postReleaseContent.classList.add('active');
                 boardName.textContent = 'Post-Release Board';
                 teamFilterGroup.style.display = 'none';
                 renderPostReleaseTables();
+            } else if (boardId === 'journey') {
+                journeyView.classList.add('active');
+                boardName.textContent = 'User Journey';
+                teamFilterGroup.style.display = 'none';
+                renderUserJourneyView();
             }
         }
 
@@ -2253,6 +2573,96 @@
                     </tr>
                 `;
             }).join('');
+        }
+
+        // ========== USER JOURNEY VIEW ==========
+        function getTouchpointForItem(item) {
+            // Check item tags against touchpoint tag definitions
+            for (const touchpoint of CHANNELS) {
+                const hasMatch = item.tags.some(tag => touchpoint.tags.includes(tag));
+                if (hasMatch) return touchpoint;
+            }
+            return null;
+        }
+
+        function renderUserJourneyView() {
+            const container = document.getElementById('touchpoints-grid');
+
+            // Group items by touchpoint
+            const itemsByTouchpoint = {};
+            CHANNELS.forEach(tp => {
+                itemsByTouchpoint[tp.id] = [];
+            });
+
+            RELEASE_DATA.items.forEach(item => {
+                const touchpoint = getTouchpointForItem(item);
+                if (touchpoint && itemsByTouchpoint[touchpoint.id]) {
+                    itemsByTouchpoint[touchpoint.id].push(item);
+                }
+            });
+
+            // Render touchpoint columns
+            let html = '';
+
+            CHANNELS.forEach(touchpoint => {
+                const items = itemsByTouchpoint[touchpoint.id];
+
+                // Skip empty touchpoints
+                if (items.length === 0) return;
+
+                html += `
+                    <div class="touchpoint-column">
+                        <div class="touchpoint-header">
+                            <div class="touchpoint-header-content">
+                                <div class="touchpoint-color-bar" style="background: ${touchpoint.color};"></div>
+                                <div class="touchpoint-info">
+                                    <div class="touchpoint-name">${touchpoint.label}</div>
+                                    <div class="touchpoint-count">${items.length} items</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="touchpoint-items">
+                            ${items.map(item => renderJourneyItemCard(item)).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Add click handlers
+            container.querySelectorAll('.journey-item-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    openCardDetail(card.dataset.itemId);
+                });
+            });
+        }
+
+        function renderJourneyItemCard(item) {
+            let classes = 'journey-item-card';
+            if (state.activeTag) {
+                classes += item.tags.includes(state.activeTag) ? ' highlighted' : ' faded';
+            }
+
+            const displayTags = item.tags.slice(0, 3);
+            const milestoneLabel = item.milestone === '2026-01-16' ? 'Alpha' : 'Launch';
+
+            return `
+                <div class="${classes}" data-item-id="${item.id}">
+                    <div class="journey-card-header">
+                        <div class="journey-card-status ${item.status}"></div>
+                        <span class="journey-card-id">${item.id}</span>
+                        <span class="journey-card-milestone">${milestoneLabel}</span>
+                    </div>
+                    <div class="journey-card-title">${item.title}</div>
+                    <div class="journey-card-owner">${item.owner}</div>
+                    ${displayTags.length > 0 ? `
+                        <div class="journey-card-tags">
+                            ${displayTags.map(tag => `<span class="journey-card-tag">${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
         }
 
         // ========== RENDER MILESTONES ==========
@@ -2454,6 +2864,11 @@
             });
 
             updateTagFilterUI();
+
+            // Re-render journey view if active
+            if (state.currentBoard === 'journey') {
+                renderUserJourneyView();
+            }
         }
 
         function clearTagFilter() {
@@ -2469,6 +2884,11 @@
             document.querySelectorAll('.tag-pill').forEach(pill => {
                 pill.classList.remove('active');
             });
+
+            // Re-render journey view if active
+            if (state.currentBoard === 'journey') {
+                renderUserJourneyView();
+            }
         }
 
         // ========== TEAM FILTERING ==========
