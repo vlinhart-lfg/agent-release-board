@@ -1466,6 +1466,24 @@
             box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
         }
 
+        .funnel-item-card.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .journey-column-items.drag-over {
+            background: rgba(108, 99, 255, 0.08);
+            border: 2px dashed var(--primary);
+            border-radius: 8px;
+        }
+
+        .funnel-item-card.drag-placeholder {
+            border: 2px dashed var(--primary);
+            background: rgba(108, 99, 255, 0.05);
+            min-height: 60px;
+        }
+
         .funnel-card-header {
             display: flex;
             align-items: center;
@@ -2471,7 +2489,8 @@
         const state = {
             activeTag: null,
             activeTeamFilter: 'all',
-            currentBoard: 'release'
+            currentBoard: 'release',
+            stageOverrides: {} // { itemId: 'discovery' | 'experimenting' | 'optimising' }
         };
 
         // ========== UTILITIES ==========
@@ -2657,7 +2676,11 @@
 
         // ========== USER JOURNEY FUNNEL VIEW ==========
         function getJourneyStageForItem(item) {
-            // Priority: optimising > experimenting > discovery
+            // Check for manual override first
+            if (state.stageOverrides[item.id]) {
+                return state.stageOverrides[item.id];
+            }
+            // Default: tag-based mapping (priority: optimising > experimenting > discovery)
             if (item.tags.some(t => JOURNEY_STAGE_TAGS.optimising.includes(t))) return 'optimising';
             if (item.tags.some(t => JOURNEY_STAGE_TAGS.experimenting.includes(t))) return 'experimenting';
             return 'discovery';
@@ -2718,13 +2741,13 @@
                 const items = itemsByStage[stage.id];
 
                 html += `
-                    <div class="journey-column">
+                    <div class="journey-column" data-stage="${stage.id}">
                         <div class="journey-column-header ${stage.id}">
                             <div class="journey-column-dot ${stage.id}"></div>
                             <div class="journey-column-title">${stage.label}</div>
                             <div class="journey-column-count">${items.length} items</div>
                         </div>
-                        <div class="journey-column-items">
+                        <div class="journey-column-items" data-stage="${stage.id}">
                             ${items.length > 0
                                 ? items.map(item => renderFunnelItemCard(item)).join('')
                                 : '<div class="journey-column-empty">No items in this stage</div>'
@@ -2736,10 +2759,71 @@
 
             container.innerHTML = html;
 
-            // Add click handlers
+            // Add click handlers for cards
             container.querySelectorAll('.funnel-item-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    openCardDetail(card.dataset.itemId);
+                card.addEventListener('click', (e) => {
+                    // Don't open detail if we're dragging
+                    if (!card.classList.contains('dragging')) {
+                        openCardDetail(card.dataset.itemId);
+                    }
+                });
+            });
+
+            // Setup drag and drop
+            setupJourneyDragDrop();
+        }
+
+        function setupJourneyDragDrop() {
+            const container = document.getElementById('journey-columns');
+            let draggedItem = null;
+
+            // Drag start
+            container.querySelectorAll('.funnel-item-card').forEach(card => {
+                card.addEventListener('dragstart', (e) => {
+                    draggedItem = card;
+                    card.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', card.dataset.itemId);
+                });
+
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('dragging');
+                    draggedItem = null;
+                    // Remove all drag-over classes
+                    container.querySelectorAll('.drag-over').forEach(el => {
+                        el.classList.remove('drag-over');
+                    });
+                });
+            });
+
+            // Drop zones (the column items containers)
+            container.querySelectorAll('.journey-column-items').forEach(dropZone => {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    dropZone.classList.add('drag-over');
+                });
+
+                dropZone.addEventListener('dragleave', (e) => {
+                    // Only remove if we're leaving the drop zone entirely
+                    if (!dropZone.contains(e.relatedTarget)) {
+                        dropZone.classList.remove('drag-over');
+                    }
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+
+                    const itemId = e.dataTransfer.getData('text/plain');
+                    const newStage = dropZone.dataset.stage;
+
+                    if (itemId && newStage) {
+                        // Update the stage override
+                        state.stageOverrides[itemId] = newStage;
+                        // Re-render the columns
+                        renderJourneyColumns();
+                    }
                 });
             });
         }
@@ -2755,7 +2839,7 @@
             const touchpointLabel = touchpoint ? touchpoint.label : '';
 
             return `
-                <div class="${classes}" data-item-id="${item.id}">
+                <div class="${classes}" data-item-id="${item.id}" draggable="true">
                     <div class="funnel-card-header">
                         <div class="funnel-card-status ${item.status}"></div>
                         <span class="funnel-card-id">${item.id}</span>
