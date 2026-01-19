@@ -2432,11 +2432,30 @@
         };
 
         // ========== STATE ==========
+        // Load stage overrides from localStorage
+        function loadStageOverrides() {
+            try {
+                const saved = localStorage.getItem('journeyStageOverrides');
+                return saved ? JSON.parse(saved) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        // Save stage overrides to localStorage
+        function saveStageOverrides() {
+            try {
+                localStorage.setItem('journeyStageOverrides', JSON.stringify(state.stageOverrides));
+            } catch (e) {
+                console.warn('Could not save stage overrides to localStorage');
+            }
+        }
+
         const state = {
             activeTag: null,
             activeTeamFilter: 'all',
             currentBoard: 'release',
-            stageOverrides: {} // { itemId: 'discovery' | 'experimenting' | 'optimising' }
+            stageOverrides: loadStageOverrides() // { itemId: 'discovery' | 'experimenting' | 'optimising' }
         };
 
         // ========== UTILITIES ==========
@@ -2767,6 +2786,8 @@
                     if (itemId && newStage) {
                         // Update the stage override
                         state.stageOverrides[itemId] = newStage;
+                        // Save to localStorage
+                        saveStageOverrides();
                         // Re-render the columns
                         renderJourneyColumns();
                     }
