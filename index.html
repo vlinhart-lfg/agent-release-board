@@ -2432,8 +2432,24 @@
         };
 
         // ========== STATE ==========
-        // Load stage overrides from localStorage
+        // Load stage overrides from URL hash first, then localStorage
         function loadStageOverrides() {
+            // Try URL hash first (for sharing)
+            try {
+                const hash = window.location.hash;
+                if (hash && hash.startsWith('#stages=')) {
+                    const encoded = hash.substring(8);
+                    const decoded = decodeURIComponent(encoded);
+                    const overrides = JSON.parse(decoded);
+                    // Also save to localStorage for persistence
+                    localStorage.setItem('journeyStageOverrides', JSON.stringify(overrides));
+                    return overrides;
+                }
+            } catch (e) {
+                console.warn('Could not parse URL hash overrides');
+            }
+
+            // Fall back to localStorage
             try {
                 const saved = localStorage.getItem('journeyStageOverrides');
                 return saved ? JSON.parse(saved) : {};
@@ -2442,12 +2458,22 @@
             }
         }
 
-        // Save stage overrides to localStorage
+        // Save stage overrides to localStorage and URL hash
         function saveStageOverrides() {
             try {
+                // Save to localStorage
                 localStorage.setItem('journeyStageOverrides', JSON.stringify(state.stageOverrides));
+
+                // Update URL hash for sharing
+                if (Object.keys(state.stageOverrides).length > 0) {
+                    const encoded = encodeURIComponent(JSON.stringify(state.stageOverrides));
+                    history.replaceState(null, '', '#stages=' + encoded);
+                } else {
+                    // Clear hash if no overrides
+                    history.replaceState(null, '', window.location.pathname);
+                }
             } catch (e) {
-                console.warn('Could not save stage overrides to localStorage');
+                console.warn('Could not save stage overrides');
             }
         }
 
