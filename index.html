@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Agent Analytics - Product Dashboard</title>
+    <title>Release Board - Make AI Agents</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #6C63FF;
             --primary-dark: #4A44D4;
+            --primary-light: rgba(108, 99, 255, 0.1);
             --success: #10B981;
             --warning: #F59E0B;
             --alert: #EF4444;
-            --agent-blue: #3B82F6;
-            --non-agent-gray: #9CA3AF;
             --bg-light: #F9FAFB;
             --bg-white: #FFFFFF;
             --text-primary: #111827;
             --text-secondary: #6B7280;
             --text-muted: #9CA3AF;
             --border: #E5E7EB;
+
+            --team-product: #6C63FF;
+            --team-marketing: #3B82F6;
+            --team-growth: #10B981;
+            --team-support: #F59E0B;
+
+            --status-on-track: #10B981;
+            --status-at-risk: #F59E0B;
+            --status-blocked: #EF4444;
         }
 
         * {
@@ -34,21 +41,22 @@
             background: var(--bg-light);
             color: var(--text-primary);
             line-height: 1.5;
+            min-height: 100vh;
         }
 
-        .dashboard {
-            max-width: 1440px;
+        .release-board {
+            max-width: 1400px;
             margin: 0 auto;
             padding: 24px;
         }
 
-        /* Header */
-        .header {
+        /* ========== HEADER ========== */
+        .board-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
-            padding-bottom: 16px;
+            padding-bottom: 20px;
             border-bottom: 1px solid var(--border);
         }
 
@@ -59,48 +67,293 @@
         }
 
         .logo {
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
         }
 
         .header-title {
             font-size: 24px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-primary);
         }
 
         .header-subtitle {
             font-size: 14px;
             color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        .header-right {
-            display: flex;
+        /* ========== BOARD DROPDOWN ========== */
+        .board-selector {
+            position: relative;
+            display: inline-flex;
             align-items: center;
-            gap: 16px;
+            gap: 8px;
+            cursor: pointer;
         }
 
-        .date-selector {
+        .board-selector-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
+        }
+
+        .board-selector-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--text-secondary);
+            transition: transform 0.2s ease;
+        }
+
+        .board-selector.open .board-selector-icon {
+            transform: rotate(180deg);
+        }
+
+        .board-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 8px;
             background: var(--bg-white);
             border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            min-width: 220px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .board-selector.open .board-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .board-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .board-option:first-child {
+            border-radius: 12px 12px 0 0;
+        }
+
+        .board-option:last-child {
+            border-radius: 0 0 12px 12px;
+        }
+
+        .board-option:hover {
+            background: var(--bg-light);
+        }
+
+        .board-option.active {
+            background: var(--primary-light);
+        }
+
+        .board-option-icon {
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .board-option-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .board-option-icon.release {
+            background: rgba(108, 99, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .board-option-icon.post-release {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .board-option-text {
+            flex: 1;
+        }
+
+        .board-option-title {
             font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .board-option-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ========== POST-RELEASE BOARD ========== */
+        .post-release-board {
+            display: none;
+        }
+
+        .post-release-board.active {
+            display: block;
+        }
+
+        .release-board-content {
+            display: block;
+        }
+
+        .release-board-content.hidden {
+            display: none;
+        }
+
+        .phase-section {
+            margin-bottom: 32px;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .phase-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phase-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .phase-icon.month-1 {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--team-marketing);
+        }
+
+        .phase-icon.exploratory {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .phase-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .phase-subtitle {
+            font-size: 13px;
             color: var(--text-secondary);
         }
 
-        .tab-nav {
+        .phase-table {
+            width: 100%;
+            background: var(--bg-white);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .phase-table thead {
+            background: var(--bg-light);
+        }
+
+        .phase-table th {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .phase-table td {
+            padding: 14px 16px;
+            font-size: 14px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .phase-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .phase-table tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        .table-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .table-status.planned {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-secondary);
+        }
+
+        .table-status.in-progress {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--team-marketing);
+        }
+
+        .table-status.not-started {
+            background: rgba(156, 163, 175, 0.1);
+            color: var(--text-muted);
+        }
+
+        .table-team-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .table-team-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .filter-group {
             display: flex;
             gap: 4px;
             background: var(--bg-white);
@@ -109,1712 +362,2299 @@
             border: 1px solid var(--border);
         }
 
-        .tab-btn {
-            padding: 8px 20px;
+        .filter-btn {
+            padding: 8px 14px;
             border: none;
             background: transparent;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
-        .tab-btn.active {
+        .filter-btn:hover {
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
             background: var(--primary);
             color: white;
         }
 
-        .tab-btn:hover:not(.active) {
-            background: var(--bg-light);
-        }
-
-        /* View Container */
-        .view {
-            display: none;
-        }
-
-        .view.active {
-            display: block;
-        }
-
-        /* Hero Card - North Star */
-        .hero-card {
-            background: linear-gradient(135deg, var(--bg-white) 0%, #F3F4FF 100%);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 6px;
-            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
-        }
-
-        .hero-label {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .hero-title {
-            font-size: 16px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .hero-value-row {
-            display: flex;
-            align-items: baseline;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .hero-value {
-            font-size: 64px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .hero-trend {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
-            background: rgba(16, 185, 129, 0.1);
-            border-radius: 20px;
-            color: var(--success);
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .hero-trend.negative {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--alert);
-        }
-
-        /* Progress Bar */
-        .progress-container {
-            margin-bottom: 16px;
-        }
-
-        .progress-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .progress-bar {
-            height: 12px;
-            background: var(--bg-light);
-            border-radius: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-target-zone {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            background: rgba(108, 99, 255, 0.15);
-            border-left: 2px dashed var(--primary);
-            border-right: 2px dashed var(--primary);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-            border-radius: 6px;
-            transition: width 0.5s ease;
-        }
-
-        .progress-marker {
-            position: absolute;
-            top: -6px;
-            width: 24px;
-            height: 24px;
-            background: var(--primary);
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transform: translateX(-50%);
-        }
-
-        /* Sparkline placeholder */
-        .sparkline-container {
-            height: 60px;
-            margin-top: 16px;
-        }
-
-        /* Cards Grid */
-        .cards-grid {
+        /* ========== SUMMARY HEADER ========== */
+        .summary-header {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
-        .metric-card {
+        .summary-card {
             background: var(--bg-white);
             border-radius: 12px;
             padding: 20px;
             border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        .metric-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .metric-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .metric-status {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
+        .summary-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-        }
-
-        .metric-status.success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-
-        .metric-status.warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-
-        .metric-status.alert {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--alert);
-        }
-
-        .metric-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .metric-target {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        /* Usage Stats Grid */
-        .usage-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-        }
-
-        .usage-stat {
-            text-align: center;
-            padding: 24px 16px;
-            background: var(--bg-light);
-            border-radius: 12px;
-        }
-
-        .usage-stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .usage-stat-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .usage-stat-trend {
-            font-size: 12px;
-            font-weight: 500;
-            padding: 4px 8px;
-            border-radius: 12px;
-            display: inline-block;
-        }
-
-        .usage-stat-trend.positive {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-
-        .usage-stat-trend.negative {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--alert);
-        }
-
-        .usage-stat-trend.neutral {
-            background: rgba(107, 114, 128, 0.1);
-            color: var(--text-secondary);
-        }
-
-        /* Two Column Layout */
-        .two-col {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .section-card {
-            background: var(--bg-white);
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-icon {
-            width: 32px;
-            height: 32px;
-            background: rgba(108, 99, 255, 0.1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-        }
-
-        /* Retention Comparison Chart */
-        .retention-bars {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .retention-row {
-            display: grid;
-            grid-template-columns: 60px 1fr 60px;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .retention-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-
-        .retention-bar-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .retention-bar-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .retention-bar {
-            height: 20px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            padding-right: 8px;
-            justify-content: flex-end;
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-            min-width: 40px;
-        }
-
-        .retention-bar.agent {
-            background: linear-gradient(90deg, var(--agent-blue), #60A5FA);
-        }
-
-        .retention-bar.non-agent {
-            background: var(--non-agent-gray);
-        }
-
-        .retention-lift {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--success);
-            text-align: right;
-        }
-
-        .retention-legend {
-            display: flex;
-            gap: 24px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-        }
-
-        .legend-dot.agent {
-            background: var(--agent-blue);
-        }
-
-        .legend-dot.non-agent {
-            background: var(--non-agent-gray);
-        }
-
-        .retention-summary {
-            margin-top: 16px;
-            padding: 16px;
-            background: rgba(16, 185, 129, 0.05);
-            border-radius: 8px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .retention-summary-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--success);
-        }
-
-        .retention-summary-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        /* Alerts Panel */
-        .alerts-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .alert-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 12px;
-            background: var(--bg-light);
-            border-radius: 8px;
-        }
-
-        .alert-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
             flex-shrink: 0;
         }
 
-        .alert-icon.warning {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--warning);
+        .summary-icon svg {
+            width: 24px;
+            height: 24px;
         }
 
-        .alert-icon.success {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-        }
+        .countdown-icon { background: var(--primary-light); color: var(--primary); }
+        .health-icon { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .items-icon { background: rgba(59, 130, 246, 0.1); color: var(--team-marketing); }
+        .risk-icon { background: rgba(239, 68, 68, 0.1); color: var(--alert); }
 
-        .alert-icon.alert {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--alert);
-        }
-
-        .alert-content {
-            flex: 1;
-        }
-
-        .alert-title {
-            font-size: 14px;
-            font-weight: 500;
+        .summary-value {
+            font-size: 28px;
+            font-weight: 700;
             color: var(--text-primary);
-        }
-
-        .alert-subtitle {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        /* Churn Risk Card */
-        .churn-card {
-            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid #F59E0B;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 8px;
         }
 
-        .churn-donut {
-            width: 80px;
-            height: 80px;
-            position: relative;
-        }
-
-        .churn-value {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--warning);
-        }
-
-        .churn-text {
-            flex: 1;
-        }
-
-        .churn-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .churn-subtitle {
+        .summary-label {
             font-size: 13px;
             color: var(--text-secondary);
-        }
-
-        /* ========== VIEW 2 STYLES ========== */
-
-        /* Funnel */
-        .funnel-container {
-            background: var(--bg-white);
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
-
-        .funnel-visual {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0;
-            margin: 24px 0;
-        }
-
-        .funnel-stage {
-            text-align: center;
-            position: relative;
-        }
-
-        .funnel-box {
-            padding: 24px 40px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border-radius: 12px;
-            min-width: 160px;
-        }
-
-        .funnel-box.stage-1 {
-            background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
-            color: var(--primary-dark);
-        }
-
-        .funnel-box.stage-2 {
-            background: linear-gradient(135deg, #A5B4FC, #818CF8);
-            color: white;
-        }
-
-        .funnel-box.stage-3 {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-        }
-
-        .funnel-stage-name {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            opacity: 0.9;
-        }
-
-        .funnel-stage-value {
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .funnel-stage-label {
-            font-size: 13px;
-            opacity: 0.9;
-        }
-
-        .funnel-stage-time {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .funnel-arrow {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0 16px;
-        }
-
-        .funnel-arrow-line {
-            width: 60px;
-            height: 3px;
-            background: var(--border);
-            position: relative;
-        }
-
-        .funnel-arrow-line::after {
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: -4px;
-            border: 6px solid transparent;
-            border-left-color: var(--border);
-        }
-
-        .funnel-conversion {
-            background: var(--bg-white);
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--primary);
-            border: 1px solid var(--border);
-            margin-bottom: 8px;
-        }
-
-        /* Building Sub-stages */
-        .building-substages {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-top: 16px;
-            padding: 16px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-        }
-
-        .substage-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .substage-label {
-            font-size: 11px;
             font-weight: 500;
-            width: 80px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
         }
 
-        .substage-bar-track {
-            flex: 1;
-            height: 16px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .substage-bar-fill {
-            height: 100%;
-            background: rgba(255,255,255,0.6);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 6px;
-            transition: width 0.3s ease;
-        }
-
-        .substage-bar-fill.at-risk {
-            background: rgba(239, 68, 68, 0.7);
-        }
-
-        .substage-value {
-            font-size: 10px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .substage-count {
-            font-size: 11px;
-            font-weight: 500;
-            width: 45px;
-            text-align: right;
-        }
-
-        /* Substage Breakdown Section */
-        .substage-breakdown {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .substage-card {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px 20px;
-            min-width: 130px;
-            text-align: center;
-        }
-
-        .substage-card.production {
-            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-            border-color: var(--success);
-        }
-
-        .substage-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .substage-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .substage-badge {
-            font-size: 9px;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
-
-        .substage-badge.at-risk {
-            background: #fef2f2;
-            color: var(--alert);
-        }
-
-        .substage-metric {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .substage-card.production .substage-metric {
-            color: var(--success);
-        }
-
-        .substage-users {
+        .summary-detail {
             font-size: 12px;
             color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-
-        .substage-desc {
-            font-size: 11px;
-            color: var(--text-muted);
-            opacity: 0.8;
-        }
-
-        .substage-arrow {
-            font-size: 20px;
-            color: var(--text-muted);
-            opacity: 0.5;
-        }
-
-        /* Experiment Analytics */
-        .experiment-section {
-            margin-top: 16px;
-        }
-
-        .experiment-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .experiment-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .experiment-badge {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
-            background: #dbeafe;
-            color: #1d4ed8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .experiment-funnel {
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            gap: 16px;
-            padding: 20px;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .experiment-stage {
-            text-align: center;
-            min-width: 140px;
-        }
-
-        .experiment-stage.highlight {
-            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-            padding: 16px;
-            border-radius: 10px;
-            border: 1px solid var(--success);
-        }
-
-        .experiment-stage-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .experiment-stage.highlight .experiment-stage-value {
-            color: var(--success);
-        }
-
-        .experiment-stage-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
             margin-top: 4px;
         }
 
-        .experiment-stage-desc {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 2px;
+        .health-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
 
-        .experiment-substages {
-            margin-top: 12px;
-            padding: 12px;
-            background: white;
+        .health-indicator.on-track { background: var(--status-on-track); }
+        .health-indicator.at-risk { background: var(--status-at-risk); }
+        .health-indicator.blocked { background: var(--status-blocked); }
+
+        .risk-value { color: var(--alert); }
+
+        /* ========== ACTIVE TAGS ========== */
+        .active-tags-section {
+            margin-bottom: 16px;
+            min-height: 24px;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .active-tags-section.visible {
+            opacity: 1;
+            background: var(--bg-white);
             border-radius: 8px;
-            border: 1px solid var(--border);
-            text-align: left;
+            padding: 12px 16px;
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .experiment-substage {
+        .active-tag-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .active-tag-pill {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 12px;
-            color: var(--text-muted);
-            padding: 4px 0;
         }
 
-        .substage-dot {
+        .clear-tag-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            opacity: 0.8;
+            padding: 0;
+        }
+
+        .clear-tag-btn:hover { opacity: 1; }
+
+        .tag-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        /* ========== TAG FILTERS SECTION ========== */
+        .tag-filters-section {
+            margin-bottom: 20px;
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid var(--border);
+        }
+
+        .tag-filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .tag-filters-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-filters-clear {
+            font-size: 12px;
+            color: var(--primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .tag-filters-clear.visible {
+            opacity: 1;
+        }
+
+        .tag-filters-clear:hover {
+            text-decoration: underline;
+        }
+
+        .tag-filters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-tag-pill {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--bg-light);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-tag-pill:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .filter-tag-pill.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .filter-tag-count {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-tag-pill.active .filter-tag-count {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ========== MILESTONE COLUMNS ========== */
+        .milestones-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .milestone-column {
+            background: var(--bg-white);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .milestone-column.is-launch {
+            border: 2px solid var(--alert);
+        }
+
+        .milestone-header {
+            padding: 20px;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .milestone-column.is-launch .milestone-header {
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .milestone-date {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .milestone-column.is-launch .milestone-date {
+            color: var(--alert);
+        }
+
+        .milestone-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .milestone-column.is-launch .milestone-label {
+            color: var(--alert);
+            font-weight: 600;
+        }
+
+        .milestone-stats {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 12px;
+        }
+
+        .milestone-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+        }
+
+        .milestone-stat-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
         }
 
-        .substage-dot.created {
-            background: #fca5a5;
-        }
-
-        .substage-dot.configured {
-            background: #a5b4fc;
-        }
-
-        .substage-dot.production {
-            background: #86efac;
-        }
-
-        .experiment-arrow {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            font-size: 20px;
-            padding-top: 10px;
-        }
-
-        .experiment-conversion {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--primary);
-            background: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            margin-bottom: 4px;
-        }
-
-        .experiment-summary {
-            margin-top: 16px;
-            text-align: center;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .experiment-summary strong {
-            color: var(--success);
-            font-size: 15px;
-        }
-
-        /* Feature Adoption */
-        .feature-adoption-grid {
+        .milestone-body {
+            padding: 16px;
+            flex: 1;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-top: 16px;
+            max-height: 600px;
+            overflow-y: auto;
         }
 
-        .feature-adoption-item {
+        /* ========== TEAM SECTION ========== */
+        .team-section {
+            margin-bottom: 8px;
+        }
+
+        .team-section-header {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 16px;
-            background: #f8fafc;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+        .team-section-indicator {
+            width: 3px;
+            height: 16px;
+            border-radius: 2px;
+        }
+
+        .team-section-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .team-section-count {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        /* ========== ITEM CARDS ========== */
+        .item-card {
+            background: var(--bg-white);
             border-radius: 10px;
             border: 1px solid var(--border);
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
         }
 
-        .feature-adoption-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
+        .item-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .item-card.faded {
+            opacity: 0.2;
+        }
+
+        .item-card.highlighted {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+        }
+
+        .card-top {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .card-team-bar {
+            width: 4px;
+            height: 40px;
+            border-radius: 2px;
             flex-shrink: 0;
         }
 
-        .feature-adoption-icon.knowledge {
-            background: #dbeafe;
-            color: #2563eb;
-        }
-
-        .feature-adoption-icon.tools {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
-        .feature-adoption-icon.websearch {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .feature-adoption-icon.mcp {
-            background: #f3e8ff;
-            color: #9333ea;
-        }
-
-        .feature-adoption-info {
+        .card-main {
             flex: 1;
+            min-width: 0;
         }
 
-        .feature-adoption-name {
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-dot.on-track { background: var(--status-on-track); }
+        .status-dot.at-risk { background: var(--status-at-risk); }
+        .status-dot.blocked { background: var(--status-blocked); }
+
+        .card-id {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .card-title {
             font-size: 14px;
             font-weight: 600;
             color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 2px;
         }
 
-        .feature-adoption-desc {
+        .card-owner {
             font-size: 12px;
             color: var(--text-muted);
-            margin-top: 2px;
         }
 
-        .feature-adoption-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
+        .card-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 10px;
         }
 
-        /* Stats Grid for View 2 */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        /* Building Phase Card */
-        .building-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
-        .building-stat {
-            text-align: center;
-            padding: 16px;
-            background: var(--bg-light);
-            border-radius: 8px;
-        }
-
-        .building-stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .building-stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        .building-stat-target {
+        .tag-pill {
+            padding: 3px 10px;
+            border-radius: 10px;
             font-size: 11px;
-            color: var(--success);
-            margin-top: 4px;
+            font-weight: 500;
+            background: var(--bg-light);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
 
-        /* Templates Table */
-        .templates-table {
-            width: 100%;
+        .tag-pill:hover {
+            background: var(--primary);
+            color: white;
         }
 
-        .template-row {
+        .tag-pill.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .card-progress {
+            margin-top: 10px;
             display: flex;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
+            gap: 8px;
         }
 
-        .template-row:last-child {
-            border-bottom: none;
-        }
-
-        .template-rank {
-            width: 28px;
-            height: 28px;
+        .progress-bar {
+            flex: 1;
+            height: 4px;
             background: var(--bg-light);
-            border-radius: 50%;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.on-track { background: var(--status-on-track); }
+        .progress-fill.at-risk { background: var(--status-at-risk); }
+        .progress-fill.blocked { background: var(--status-blocked); }
+
+        .progress-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            min-width: 32px;
+            text-align: right;
+        }
+
+        /* ========== CARD DETAIL MODAL ========== */
+        .card-detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-right: 12px;
-        }
-
-        .template-name {
-            flex: 1;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .template-uses {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-right: 16px;
-        }
-
-        .template-rate {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-
-        .template-summary {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .template-summary-item {
-            text-align: center;
-        }
-
-        .template-summary-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .template-summary-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* Segments Section */
-        .segments-container {
-            background: var(--bg-white);
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid var(--border);
-        }
-
-        .segments-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-        }
-
-        .segment-group h4 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-
-        .segment-bars {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .segment-bar-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .segment-bar-label {
-            width: 80px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .segment-bar-track {
-            flex: 1;
-            height: 24px;
-            background: var(--bg-light);
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .segment-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 8px;
-        }
-
-        .segment-bar-value {
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: relative;
-            cursor: help;
-        }
-
-        .tooltip::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--text-primary);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            white-space: nowrap;
+            z-index: 100;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.2s;
-            z-index: 100;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
         }
 
-        .tooltip:hover::after {
+        .card-detail-overlay.visible {
             opacity: 1;
             visibility: visible;
         }
 
-        /* Info Icon */
-        .info-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 16px;
-            height: 16px;
-            background: var(--bg-light);
-            border-radius: 50%;
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-left: 4px;
-            cursor: help;
+        .card-detail-modal {
+            background: var(--bg-white);
+            border-radius: 16px;
+            width: 520px;
+            max-width: 90vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.2s ease;
+            position: relative;
         }
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 24px;
-            color: var(--text-muted);
+        .card-detail-overlay.visible .card-detail-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--bg-light);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            padding: 24px 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .modal-status-badge.on-track {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--status-on-track);
+        }
+
+        .modal-status-badge.at-risk {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--status-at-risk);
+        }
+
+        .modal-status-badge.blocked {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--status-blocked);
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .modal-team {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .modal-body {
+            padding: 20px 24px 28px;
+        }
+
+        .modal-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-row:last-child {
+            border-bottom: none;
+        }
+
+        .modal-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            width: 100px;
+            flex-shrink: 0;
+        }
+
+        .modal-value {
+            font-size: 14px;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .modal-progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .modal-progress {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .modal-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 4px;
+        }
+
+        .modal-progress-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .modal-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .modal-tags .tag-pill {
+            padding: 4px 12px;
             font-size: 12px;
         }
 
-        /* Print Styles */
-        @media print {
-            body {
-                background: white;
+        .modal-dependencies {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .dependency-pill {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--team-marketing);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .dependency-pill:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .modal-description-text {
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.7;
+            margin-top: 8px;
+        }
+
+        .priority-badge {
+            display: inline-flex;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-badge.critical { background: rgba(239, 68, 68, 0.1); color: var(--alert); }
+        .priority-badge.high { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .priority-badge.medium { background: rgba(59, 130, 246, 0.1); color: var(--team-marketing); }
+        .priority-badge.low { background: rgba(156, 163, 175, 0.1); color: var(--text-muted); }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-team {
+            padding: 12px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1100px) {
+            .milestones-container {
+                grid-template-columns: 1fr;
             }
-            .dashboard {
-                padding: 0;
+
+            .summary-header {
+                grid-template-columns: repeat(2, 1fr);
             }
-            .tab-nav {
-                display: none;
+        }
+
+        @media (max-width: 600px) {
+            .summary-header {
+                grid-template-columns: 1fr;
+            }
+
+            .board-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard">
+    <div class="release-board">
         <!-- Header -->
-        <header class="header">
+        <header class="board-header">
             <div class="header-left">
                 <div class="logo">M</div>
                 <div>
-                    <div class="header-title">AI Agent Analytics</div>
-                    <div class="header-subtitle">Product Dashboard</div>
+                    <div class="board-selector" id="board-selector">
+                        <h1 class="board-selector-title">
+                            <span id="current-board-name">Release Board</span>
+                            <svg class="board-selector-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </h1>
+                        <div class="board-dropdown">
+                            <div class="board-option active" data-board="release">
+                                <div class="board-option-icon release">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                </div>
+                                <div class="board-option-text">
+                                    <div class="board-option-title">Release Board</div>
+                                    <div class="board-option-desc">Pre-launch milestones</div>
+                                </div>
+                            </div>
+                            <div class="board-option" data-board="post-release">
+                                <div class="board-option-icon post-release">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                    </svg>
+                                </div>
+                                <div class="board-option-text">
+                                    <div class="board-option-title">Post-Release Board</div>
+                                    <div class="board-option-desc">Month 1 & Exploratory</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="header-subtitle">Make AI Agents Launch</p>
                 </div>
             </div>
-            <div class="header-right">
-                <div class="date-selector">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    Last 30 Days
-                </div>
-                <nav class="tab-nav">
-                    <button class="tab-btn active" onclick="showView('view1', this)">Overview</button>
-                    <button class="tab-btn" onclick="showView('view2', this)">Funnel & Adoption</button>
-                </nav>
+            <div class="filter-group" id="team-filter-group">
+                <button class="filter-btn active" data-filter="all">All Teams</button>
+                <button class="filter-btn" data-filter="product">Product</button>
+                <button class="filter-btn" data-filter="marketing">Marketing</button>
+                <button class="filter-btn" data-filter="growth">Growth</button>
+                <button class="filter-btn" data-filter="support">Support</button>
             </div>
         </header>
 
-        <!-- View 1: Executive Overview -->
-        <div id="view1" class="view active">
-            <!-- North Star Hero Card -->
-            <div class="hero-card">
-                <div class="hero-label">North Star Metric</div>
-                <div class="hero-title tooltip" data-tooltip="(Users with 1+ Production Agent) / (Users with 1+ Active Scenario)">
-                    Active Agent Adoption Rate
-                    <span class="info-icon">?</span>
+        <!-- Release Board Content -->
+        <div class="release-board-content" id="release-board-content">
+        <!-- Summary -->
+        <section class="summary-header">
+            <div class="summary-card">
+                <div class="summary-icon countdown-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                 </div>
-                <div class="hero-value-row">
-                    <div class="hero-value">34.2%</div>
-                    <div class="hero-trend">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                            <polyline points="17 6 23 6 23 12"></polyline>
-                        </svg>
-                        +2.3% vs last month
-                    </div>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-labels">
-                        <span>0%</span>
-                        <span>Target Zone: 30-40%</span>
-                        <span>100%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-target-zone" style="left: 30%; width: 10%;"></div>
-                        <div class="progress-fill" style="width: 34.2%;"></div>
-                        <div class="progress-marker" style="left: 34.2%;"></div>
-                    </div>
-                </div>
-                <div class="sparkline-container">
-                    <canvas id="sparklineChart"></canvas>
+                <div>
+                    <div class="summary-value" id="countdown-days">22</div>
+                    <div class="summary-label">Days to Launch</div>
+                    <div class="summary-detail">February 2, 2026</div>
                 </div>
             </div>
+            <div class="summary-card">
+                <div class="summary-icon health-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="summary-value">
+                        <span class="health-indicator" id="health-indicator"></span>
+                        <span id="health-status">On Track</span>
+                    </div>
+                    <div class="summary-label">Release Health</div>
+                    <div class="summary-detail" id="health-detail">75% complete</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon items-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="summary-value" id="total-items">17</div>
+                    <div class="summary-label">Total Items</div>
+                    <div class="summary-detail">4 teams</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon risk-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="summary-value risk-value" id="at-risk-count">3</div>
+                    <div class="summary-label">At Risk</div>
+                    <div class="summary-detail" id="blocked-detail">1 blocked</div>
+                </div>
+            </div>
+        </section>
 
-            <!-- Supporting Metrics -->
-            <div class="cards-grid">
-                <div class="metric-card">
-                    <div class="metric-card-header">
-                        <span class="metric-label tooltip" data-tooltip="Average from all organizations that have an active agent - total number of agents">Agent Density</span>
-                        <span class="metric-status success">&#10003;</span>
-                    </div>
-                    <div class="metric-value">2.4</div>
-                    <div class="metric-target">active agents/org &bull; Target: &gt;2.0</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-card-header">
-                        <span class="metric-label tooltip" data-tooltip="Active agents scenarios vs active scenarios">Agent Share of Automation</span>
-                        <span class="metric-status warning">!</span>
-                    </div>
-                    <div class="metric-value">18.3%</div>
-                    <div class="metric-target">of operations &bull; Target: &gt;20%</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-card-header">
-                        <span class="metric-label tooltip" data-tooltip="% of production agents still active after 30 days">Agent Retention Rate</span>
-                        <span class="metric-status success">&#10003;</span>
-                    </div>
-                    <div class="metric-value">87%</div>
-                    <div class="metric-target">at 30 days &bull; Target: &gt;85%</div>
-                </div>
+        <!-- Tag Filters -->
+        <section class="tag-filters-section">
+            <div class="tag-filters-header">
+                <span class="tag-filters-title">Filter by Tag</span>
+                <button class="tag-filters-clear" id="clear-tag-filter" onclick="clearTagFilter()">Clear filter</button>
             </div>
+            <div class="tag-filters-container" id="tag-filters-container"></div>
+        </section>
 
-            <!-- Agent Usage Stats -->
-            <div class="section-card">
-                <div class="section-title">
-                    <div class="section-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 20V10"></path>
-                            <path d="M18 20V4"></path>
-                            <path d="M6 20v-4"></path>
-                        </svg>
-                    </div>
-                    Agent Usage Stats (Last 30 Days)
-                </div>
-                <div class="usage-stats-grid">
-                    <div class="usage-stat">
-                        <div class="usage-stat-value">4,230</div>
-                        <div class="usage-stat-label">Total Agents Created</div>
-                        <div class="usage-stat-trend positive">+18% vs last month</div>
-                    </div>
-                    <div class="usage-stat">
-                        <div class="usage-stat-value">2,847</div>
-                        <div class="usage-stat-label">Agents Scheduled</div>
-                        <div class="usage-stat-trend positive">+12% vs last month</div>
-                    </div>
-                    <div class="usage-stat">
-                        <div class="usage-stat-value">312</div>
-                        <div class="usage-stat-label">Agents Deleted</div>
-                        <div class="usage-stat-trend negative">+8% vs last month</div>
-                    </div>
-                </div>
-            </div>
+        <!-- Active Tags -->
+        <section class="active-tags-section" id="active-tags"></section>
 
-            <!-- Agent Details -->
-            <div class="section-card">
-                <div class="section-title">
-                    <div class="section-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                        </svg>
-                    </div>
-                    Agent Details
-                </div>
-                <div class="building-stats" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
-                    <div class="building-stat">
-                        <div class="building-stat-value">4.2</div>
-                        <div class="building-stat-label">Avg Tools/Agent</div>
-                    </div>
-                    <div class="building-stat">
-                        <div class="building-stat-value">2.8</div>
-                        <div class="building-stat-label">Avg Files/Agent</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature Adoption -->
-            <div class="section-card" style="margin-top: 24px;">
-                <div class="section-title">
-                    <div class="section-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                            <path d="M2 17l10 5 10-5"></path>
-                            <path d="M2 12l10 5 10-5"></path>
-                        </svg>
-                    </div>
-                    Feature Adoption
-                </div>
-                <div class="feature-adoption-grid">
-                    <div class="feature-adoption-item">
-                        <div class="feature-adoption-icon knowledge">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                            </svg>
-                        </div>
-                        <div class="feature-adoption-info">
-                            <div class="feature-adoption-name">Knowledge</div>
-                            <div class="feature-adoption-desc">Agents with Agent Knowledge Module</div>
-                        </div>
-                        <div class="feature-adoption-value">67%</div>
-                    </div>
-                    <div class="feature-adoption-item">
-                        <div class="feature-adoption-icon tools">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                            </svg>
-                        </div>
-                        <div class="feature-adoption-info">
-                            <div class="feature-adoption-name">Tools</div>
-                            <div class="feature-adoption-desc">Agents with Make modules</div>
-                        </div>
-                        <div class="feature-adoption-value">84%</div>
-                    </div>
-                    <div class="feature-adoption-item">
-                        <div class="feature-adoption-icon websearch">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <path d="M21 21l-4.35-4.35"></path>
-                            </svg>
-                        </div>
-                        <div class="feature-adoption-info">
-                            <div class="feature-adoption-name">Make AI Web Search</div>
-                            <div class="feature-adoption-desc">Agents with web search enabled</div>
-                        </div>
-                        <div class="feature-adoption-value">23%</div>
-                    </div>
-                    <div class="feature-adoption-item">
-                        <div class="feature-adoption-icon mcp">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                                <path d="M2 17l10 5 10-5"></path>
-                                <path d="M2 12l10 5 10-5"></path>
-                            </svg>
-                        </div>
-                        <div class="feature-adoption-info">
-                            <div class="feature-adoption-name">MCP</div>
-                            <div class="feature-adoption-desc">Agents with MCP integration</div>
-                        </div>
-                        <div class="feature-adoption-value">12%</div>
-                    </div>
-                </div>
-            </div>
+        <!-- Milestone Columns -->
+        <section class="milestones-container" id="milestones-container"></section>
         </div>
 
-        <!-- View 2: Funnel & Adoption -->
-        <div id="view2" class="view">
-            <!-- Adoption Funnel -->
-            <div class="funnel-container">
-                <div class="section-title">
-                    <div class="section-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        <!-- Post-Release Board Content -->
+        <div class="post-release-board" id="post-release-board">
+            <!-- Phase 1: First Month -->
+            <section class="phase-section">
+                <div class="phase-header">
+                    <div class="phase-icon month-1">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    Adoption Funnel
-                </div>
-                <div class="funnel-visual">
-                    <div class="funnel-stage">
-                        <div class="funnel-box stage-1">
-                            <div class="funnel-stage-name">Discovery</div>
-                            <div class="funnel-stage-value">12,450</div>
-                            <div class="funnel-stage-label">LLM module users</div>
-                        </div>
-                        <div class="funnel-stage-time">Using AI modules</div>
-                    </div>
-                    <div class="funnel-arrow">
-                        <div class="funnel-conversion">12%</div>
-                        <div class="funnel-arrow-line"></div>
-                    </div>
-                    <div class="funnel-stage">
-                        <div class="funnel-box stage-2">
-                            <div class="funnel-stage-name">Experimenting</div>
-                            <div class="funnel-stage-value">1,494</div>
-                            <div class="funnel-stage-label">users</div>
-                        </div>
-                        <div class="funnel-stage-time">Building agents</div>
-                    </div>
-                    <div class="funnel-arrow">
-                        <div class="funnel-conversion">28%</div>
-                        <div class="funnel-arrow-line"></div>
-                    </div>
-                    <div class="funnel-stage">
-                        <div class="funnel-box stage-3">
-                            <div class="funnel-stage-name">Optimising</div>
-                            <div class="funnel-stage-value">418</div>
-                            <div class="funnel-stage-label">orgs</div>
-                        </div>
-                        <div class="funnel-stage-time">3+ active agents</div>
+                    <div>
+                        <h2 class="phase-title">1st Month Post-Release</h2>
+                        <p class="phase-subtitle">Feb 2 - Mar 2, 2026 | Critical monitoring & iteration</p>
                     </div>
                 </div>
-            </div>
+                <table class="phase-table" id="month-1-table">
+                    <thead>
+                        <tr>
+                            <th>Initiative</th>
+                            <th>Team</th>
+                            <th>Status</th>
+                            <th>Owner</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="month-1-tbody"></tbody>
+                </table>
+            </section>
 
-            <!-- Experimenting Stage Breakdown -->
-            <div class="section-card" style="margin-bottom: 24px;">
-                <div class="section-title">
-                    <div class="section-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+            <!-- Phase 2: Exploratory -->
+            <section class="phase-section">
+                <div class="phase-header">
+                    <div class="phase-icon exploratory">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                     </div>
-                    Experimenting Stage Breakdown
-                </div>
-                <div class="substage-breakdown">
-                    <div class="substage-card">
-                        <div class="substage-header">
-                            <span class="substage-name">Created</span>
-                            <span class="substage-badge at-risk">At Risk</span>
-                        </div>
-                        <div class="substage-metric">45%</div>
-                        <div class="substage-users">673 orgs</div>
-                        <div class="substage-desc">Agent exists but not active<br><small>(&lt;2 ops/day last 30 days)</small></div>
-                    </div>
-                    <div class="substage-arrow">&rarr;</div>
-                    <div class="substage-card">
-                        <div class="substage-header">
-                            <span class="substage-name">Configured</span>
-                        </div>
-                        <div class="substage-metric">27%</div>
-                        <div class="substage-users">404 orgs</div>
-                        <div class="substage-desc">Tools/Context added, 1 successful run<br><small>(&lt;2 ops/day last 30 days)</small></div>
-                    </div>
-                    <div class="substage-arrow">&rarr;</div>
-                    <div class="substage-card production">
-                        <div class="substage-header">
-                            <span class="substage-name">Production</span>
-                        </div>
-                        <div class="substage-metric">28%</div>
-                        <div class="substage-users">418 orgs</div>
-                        <div class="substage-desc">1-2 active agents per org<br><small>(&ge;2 ops/day last 30 days)</small></div>
+                    <div>
+                        <h2 class="phase-title">Exploratory Phase</h2>
+                        <p class="phase-subtitle">Mar 2026+ | Future improvements & experiments</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Experiment Analytics -->
-            <div class="section-card" style="margin-bottom: 24px;">
-                <div class="section-title">
-                    <div class="section-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path>
-                        </svg>
-                    </div>
-                    Experiment Analytics
-                </div>
-                <div class="experiment-section">
-                    <div class="experiment-header">
-                        <span class="experiment-name">Library of Agents</span>
-                        <span class="experiment-badge">Active Experiment</span>
-                    </div>
-                    <div class="experiment-funnel">
-                        <div class="experiment-stage">
-                            <div class="experiment-stage-value">2,340</div>
-                            <div class="experiment-stage-label">Clicked Agent</div>
-                        </div>
-                        <div class="experiment-arrow">
-                            <span class="experiment-conversion">38%</span>
-                            &rarr;
-                        </div>
-                        <div class="experiment-stage">
-                            <div class="experiment-stage-value">889</div>
-                            <div class="experiment-stage-label">Experimenting</div>
-                            <div class="experiment-substages">
-                                <div class="experiment-substage">
-                                    <span class="substage-dot created"></span>
-                                    <span>Created: 401</span>
-                                </div>
-                                <div class="experiment-substage">
-                                    <span class="substage-dot configured"></span>
-                                    <span>Configured: 488</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="experiment-arrow">
-                            <span class="experiment-conversion">24%</span>
-                            &rarr;
-                        </div>
-                        <div class="experiment-stage highlight">
-                            <div class="experiment-stage-value">213</div>
-                            <div class="experiment-stage-label">Production</div>
-                            <div class="experiment-stage-desc">1-2 active agents</div>
-                        </div>
-                    </div>
-                    <div class="experiment-summary">
-                        <span>Overall conversion: <strong>9.1%</strong> (Clicked &rarr; Production)</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Adoption by Plan Type -->
-            <div class="section-card">
-                <div class="section-title">
-                    <div class="section-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="14" width="7" height="7"></rect>
-                            <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                    </div>
-                    Adoption Rate by Plan Type
-                </div>
-                <div class="segment-bars" style="max-width: 600px;">
-                    <div class="segment-bar-row">
-                        <div class="segment-bar-label">Enterprise</div>
-                        <div class="segment-bar-track">
-                            <div class="segment-bar-fill" style="width: 67%;">
-                                <span class="segment-bar-value">67%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="segment-bar-row">
-                        <div class="segment-bar-label">Team</div>
-                        <div class="segment-bar-track">
-                            <div class="segment-bar-fill" style="width: 52%;">
-                                <span class="segment-bar-value">52%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="segment-bar-row">
-                        <div class="segment-bar-label">Pro</div>
-                        <div class="segment-bar-track">
-                            <div class="segment-bar-fill" style="width: 38%;">
-                                <span class="segment-bar-value">38%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="segment-bar-row">
-                        <div class="segment-bar-label">Free</div>
-                        <div class="segment-bar-track">
-                            <div class="segment-bar-fill" style="width: 18%;">
-                                <span class="segment-bar-value">18%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                <table class="phase-table" id="exploratory-table">
+                    <thead>
+                        <tr>
+                            <th>Initiative</th>
+                            <th>Team</th>
+                            <th>Status</th>
+                            <th>Owner</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exploratory-tbody"></tbody>
+                </table>
+            </section>
         </div>
 
-        <footer class="footer">
-            Make.com AI Agent Analytics &bull; Product Dashboard &bull; Data as of December 2025
-        </footer>
+        <!-- Modal -->
+        <div class="card-detail-overlay" id="card-detail-overlay">
+            <div class="card-detail-modal" id="card-detail-modal"></div>
+        </div>
     </div>
 
     <script>
-        // Tab switching
-        function showView(viewId, btn) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            btn.classList.add('active');
+        // ========== CONFIGURATION ==========
+        const RELEASE_DATA = {
+            config: {
+                releaseName: "Make AI Agents",
+                milestones: [
+                    { date: "2026-01-16", label: "Alpha Ready", isLaunch: false },
+                    { date: "2026-02-02", label: "LAUNCH DAY", isLaunch: true }
+                ],
+                teams: [
+                    { id: "product", name: "Product", color: "#6C63FF" },
+                    { id: "marketing", name: "Marketing", color: "#3B82F6" },
+                    { id: "growth", name: "Growth", color: "#10B981" },
+                    { id: "support", name: "Support", color: "#F59E0B" }
+                ]
+            },
+            items: [
+                // ========================================
+                // ===== BY JAN 16 (Alpha Ready) =========
+                // ========================================
+
+                // --- CONTEXT APP (Feature Flag) ---
+                {
+                    id: "CTX-001",
+                    title: "Create databases on all prod zones",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["context-app", "infrastructure", "database"],
+                    dependencies: [],
+                    owner: "Artemy Dmitriev",
+                    description: "Create databases on all production zones for the Context App behind a feature flag.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "CTX-002",
+                    title: "File names exchange between module and agent",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["context-app", "files", "agent"],
+                    dependencies: [],
+                    owner: "Pavel Kolman",
+                    description: "Figure out how to send and receive file names between the standalone module and the agent. Agent should be able to execute a search selecting a file name and a query.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "CTX-003",
+                    title: "Hide standalone module from normal search",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["context-app", "inspector"],
+                    dependencies: [],
+                    owner: "Marek Spiska",
+                    description: "Implement the logic of hiding the standalone module from the normal search (using a boolean flag in the manifest of the app, then inspector filters it).",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- INTERNAL CHAT ---
+                {
+                    id: "CHAT-001",
+                    title: "Streaming events",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["internal-chat", "streaming"],
+                    dependencies: [],
+                    owner: "David",
+                    description: "Implement streaming events for internal chat - one of two main features needed before shipping to users.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "CHAT-002",
+                    title: "Reset chat if mappings change",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["internal-chat", "mapping"],
+                    dependencies: [],
+                    owner: "David",
+                    description: "Implement resetting the chat if the mappings change - one of two main features needed before shipping to users.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "CHAT-003",
+                    title: "Internal chat minor improvements",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["internal-chat"],
+                    dependencies: ["CHAT-001", "CHAT-002"],
+                    owner: "David",
+                    description: "Minor improvements to internal chat functionality.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- LET AI DECIDE ---
+                {
+                    id: "AI-001",
+                    title: "Let AI Decide - testing popular apps",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "at-risk",
+                    tags: ["let-ai-decide", "testing", "local-agents"],
+                    dependencies: [],
+                    owner: "Vitek Linhart",
+                    description: "Key point for local agents - testing popular apps to ensure Let AI Decide works properly and supports 90% of cases. Many cases where Let AI Decide is not enabled (e.g., arrays). Report WIP: https://docs.google.com/document/d/1SvN0oClgRKcxw09n33JhKUMBORkXZmgBEdHxFu1qgyw/edit",
+                    progress: 0,
+                    priority: "critical"
+                },
+
+                // --- FILES ---
+                {
+                    id: "FILES-001",
+                    title: "Files PR review",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["files", "pr-review"],
+                    dependencies: [],
+                    owner: "Pavel Kolman",
+                    description: "Pavel Kolman dropped a FAT PR for Files feature - it seems to work but needs review and testing.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- MAPPING ---
+                {
+                    id: "MAP-001",
+                    title: "Ask for mapping if tool needs variable",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["mapping", "tools"],
+                    dependencies: [],
+                    owner: "David",
+                    description: "Implement asking for mapping if a tool needs a variable.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- CALL SUB SCENARIO MODULE ---
+                {
+                    id: "SUB-001",
+                    title: "Engine fetch scenario name + description",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["call-sub-scenario", "engine"],
+                    dependencies: [],
+                    owner: "Jan Eliáš",
+                    description: "Engine will fetch scenario name + description and pass it to the agent app when calling.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "SUB-002",
+                    title: "Module show/edit scenario name & description",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["call-sub-scenario", "ui"],
+                    dependencies: ["SUB-001"],
+                    owner: "Marek Spiska",
+                    description: "Module will show scenario name and description, also allow user to edit. Name and description will be mandatory so user needs to fill them.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- FIXES ---
+                {
+                    id: "FIX-001",
+                    title: "Fix agent output/reasoning interchange",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["fix", "reasoning", "agent"],
+                    dependencies: [],
+                    owner: "Pavel Kolman",
+                    description: "In reasoning: fix wrong interchange between agent output and agent reasoning.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "FIX-002",
+                    title: "Move search input to advanced config",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["fix", "knowledge", "ui"],
+                    dependencies: [],
+                    owner: "Pavel Kolman",
+                    description: "In Knowledge standalone module: move search input to advanced config.",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "FIX-003",
+                    title: "Fix Add Knowledge button not displaying",
+                    team: "product",
+                    milestone: "2026-01-16",
+                    status: "blocked",
+                    tags: ["fix", "knowledge", "ui"],
+                    dependencies: [],
+                    owner: "Marek Spiska",
+                    description: "Add Knowledge button is not displaying (only displays after adding and deleting the knowledge app).",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- COMMUNITY WEBINAR ---
+                {
+                    id: "WBN-001",
+                    title: "Community Live Session: All About Agents + Sneak Peek",
+                    team: "marketing",
+                    milestone: "2026-01-16",
+                    status: "on-track",
+                    tags: ["webinar", "community", "sneak-peek", "live-demo"],
+                    dependencies: [],
+                    owner: "Vitek Linhart",
+                    description: "The AI agent industry is still 'in diapers,' but the window to gain a competitive edge is open now. Join Make's AI Product Manager for a raw, hands-on session on AI Agents.\n\n3 Core Pillars:\n• How do I figure it out? Developing the mentality and process to architect reliable agents.\n• How do I find the use case? Identifying which company processes to 'sacrifice' for experimentation.\n• How do I experiment? Moving from theory to live build—including how to 'fix the agent' when it fails.\n\nAgenda:\n• Reality Check: When to use agents vs. standard automation and where the industry is heading.\n• Live Build & Demo: Watch Vitek build an agent from scratch, showing exactly how to structure logic and handle troubleshooting.\n• Sneak Peek: Exclusive first look at the new Make Agent!",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // ========================================
+                // ===== BY FEB 2 (LAUNCH DAY) ===========
+                // ========================================
+
+                // --- LIBRARY OF AGENTS (Product Feature) ---
+                {
+                    id: "LOA-001",
+                    title: "Library of Agents",
+                    team: "product",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["library-of-agents", "feature", "launch", "critical-path"],
+                    dependencies: [],
+                    owner: "Product Team",
+                    description: "Library of Agents feature ready for launch - curated collection of pre-built AI agents for common use cases.",
+                    progress: 0,
+                    priority: "critical"
+                },
+
+                // --- WEB ---
+                {
+                    id: "WEB-001",
+                    title: "Landing page update",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["web", "landing-page", "launch"],
+                    dependencies: [],
+                    owner: "Michael",
+                    description: "Amend old Agents page: Hero video, hero animation, use case examples, interactive demo.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "WEB-002",
+                    title: "Library of Agents videos",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["web", "library-of-agents", "video"],
+                    dependencies: [],
+                    owner: "Michael",
+                    description: "9x videos/Hackathon videos for Library of Agents.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- PAID MEDIA ---
+                {
+                    id: "PAID-001",
+                    title: "Google ad campaign",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["paid-media", "google", "ads"],
+                    dependencies: [],
+                    owner: "Su",
+                    description: "Google ad campaign for launch.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PAID-002",
+                    title: "YouTube ads",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["paid-media", "youtube", "ads"],
+                    dependencies: [],
+                    owner: "Su",
+                    description: "YouTube advertising campaign.",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "PAID-003",
+                    title: "LinkedIn ads",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["paid-media", "linkedin", "ads"],
+                    dependencies: [],
+                    owner: "Su",
+                    description: "LinkedIn advertising campaign.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- BLOG/CONTENT ---
+                {
+                    id: "BLOG-001",
+                    title: "Launch blog post",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["blog", "content", "launch"],
+                    dependencies: [],
+                    owner: "Stuart",
+                    description: "\"Introducing the next-gen Make AI Agents\" - main launch announcement.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "BLOG-002",
+                    title: "Explainer blog post",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["blog", "content", "education"],
+                    dependencies: [],
+                    owner: "Stuart",
+                    description: "\"What AI Agents do (and don't do)\", Business use case descriptions, When to use Agents vs automation vs AI steps.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "BLOG-003",
+                    title: "Technical deep dive blog",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["blog", "content", "technical"],
+                    dependencies: [],
+                    owner: "Stuart",
+                    description: "\"Why we rebuilt AI Agents inside the canvas\", \"When to use Agents vs standard modules\", advanced docs & patterns, Visual reasoning, reuse, cost transparency.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "BLOG-004",
+                    title: "9x case study videos",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["content", "video", "case-studies"],
+                    dependencies: [],
+                    owner: "Peter T",
+                    description: "9x videos and case studies content.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- SOCIAL ---
+                {
+                    id: "SOC-001",
+                    title: "Launch announcement post",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["social", "launch", "announcement"],
+                    dependencies: [],
+                    owner: "Isabella",
+                    description: "Beta announcement post across social channels.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "SOC-002",
+                    title: "Short demo clips",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["social", "video", "demo"],
+                    dependencies: [],
+                    owner: "Isabella",
+                    description: "30–60s clips showing agent reasoning for social media.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "SOC-003",
+                    title: "Use case carousels",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["social", "use-cases"],
+                    dependencies: [],
+                    owner: "Isabella",
+                    description: "Simple \"Before / After Agents\" carousels for specific use case examples.",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "SOC-004",
+                    title: "LinkedIn thought leadership",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["social", "linkedin", "thought-leadership"],
+                    dependencies: [],
+                    owner: "Isabella",
+                    description: "\"The New AI Risk Isn't Accuracy…It's Losing Visibility\" - Black-box automation creates governance and compliance blind spots. \"Workflow Automation vs AI vs Agents: How Leaders Pick the Right Tool\".",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- COMMUNITY ---
+                {
+                    id: "COM-001",
+                    title: "Reddit launch post",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["community", "reddit", "launch"],
+                    dependencies: [],
+                    owner: "Michaela",
+                    description: "Launch post on Reddit (Open Beta announcement).",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "COM-002",
+                    title: "Webinar - Business framing",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["community", "webinar", "business"],
+                    dependencies: [],
+                    owner: "Michaela",
+                    description: "Webinar with business framing around operational impact and security for buyer audience.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "COM-003",
+                    title: "Webinar - How it works",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["community", "webinar", "technical"],
+                    dependencies: [],
+                    owner: "Michaela",
+                    description: "Technical webinar showing how agents work for hands-on users.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "COM-004",
+                    title: "Agent sharing challenge",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["community", "challenge", "engagement"],
+                    dependencies: [],
+                    owner: "Michaela",
+                    description: "Share your best Agent solution around 1 or more of the patterns OR the most requested use cases.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- EMAIL ---
+                {
+                    id: "EMAIL-001",
+                    title: "Launch email",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["email", "launch"],
+                    dependencies: [],
+                    owner: "Katerina",
+                    description: "Main launch email announcement.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "EMAIL-002",
+                    title: "Product newsletter",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["email", "newsletter"],
+                    dependencies: [],
+                    owner: "Katerina",
+                    description: "Product newsletter featuring AI Agents launch.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- INFLUENCERS ---
+                {
+                    id: "INF-001",
+                    title: "Influencers - short-form social demos",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "at-risk",
+                    tags: ["influencers", "social", "demo"],
+                    dependencies: [],
+                    owner: "Javi",
+                    description: "Short-form social demos from influencers.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "INF-002",
+                    title: "YouTube deep-dive videos",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["influencers", "youtube", "video"],
+                    dependencies: [],
+                    owner: "Javi",
+                    description: "\"Build AI agents you can trust with Make\" - Build + debug real agent workflows on YouTube.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "INF-003",
+                    title: "X threads with real builds",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["influencers", "twitter", "content"],
+                    dependencies: [],
+                    owner: "Javi",
+                    description: "X/Twitter threads with real builds and business use cases.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- PR ---
+                {
+                    id: "PR-001",
+                    title: "Hackathon PR",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["pr", "hackathon", "pre-launch"],
+                    dependencies: [],
+                    owner: "Dan",
+                    description: "Pre-launch Hackathon PR.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PR-002",
+                    title: "Launch thought leadership",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["pr", "thought-leadership", "launch"],
+                    dependencies: [],
+                    owner: "Dan",
+                    description: "Launch thought leadership on agentic automation.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PR-003",
+                    title: "Analyst brief",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["pr", "analyst", "post-launch"],
+                    dependencies: [],
+                    owner: "Dan",
+                    description: "Post-launch analyst brief.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- IN-PRODUCT ---
+                {
+                    id: "PROD-001",
+                    title: "Launch banner",
+                    team: "growth",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["in-product", "banner", "launch"],
+                    dependencies: [],
+                    owner: "Growth",
+                    description: "In-product launch banner.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PROD-002",
+                    title: "Demo videos from 9x",
+                    team: "growth",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["in-product", "video", "demo"],
+                    dependencies: [],
+                    owner: "Growth",
+                    description: "Demo videos from 9x integrated in-product.",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "PROD-003",
+                    title: "Prompts on complex scenarios",
+                    team: "growth",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["in-product", "prompts", "adoption"],
+                    dependencies: [],
+                    owner: "Growth",
+                    description: "Prompts on complex scenarios (5+ module scenarios). Notification to users with at least 1 LLM + router with at least 2 routes to consider building an AI Agent.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "PROD-004",
+                    title: "Office hours",
+                    team: "growth",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["in-product", "office-hours", "support"],
+                    dependencies: [],
+                    owner: "PM/Growth",
+                    description: "Office hours for launch support.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- EVENTS ---
+                {
+                    id: "EVT-001",
+                    title: "Events coordination",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["events", "launch"],
+                    dependencies: [],
+                    owner: "Nikki",
+                    description: "Events coordination for launch.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- GTM ENABLEMENT ---
+                {
+                    id: "GTM-001",
+                    title: "Sales enablement session",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["gtm", "sales", "enablement"],
+                    dependencies: [],
+                    owner: "Mike R",
+                    description: "Internal sales enablement training session.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "GTM-002",
+                    title: "Sales enablement slides",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["gtm", "sales", "enablement"],
+                    dependencies: [],
+                    owner: "Mike R",
+                    description: "Sales enablement presentation slides.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "GTM-003",
+                    title: "1-pager - Expansion sales",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["gtm", "sales", "collateral"],
+                    dependencies: [],
+                    owner: "Mike R",
+                    description: "1-pager for expansion-focused sales (buyer audience).",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "GTM-004",
+                    title: "1-pager - Hands-on user",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["gtm", "sales", "collateral"],
+                    dependencies: [],
+                    owner: "Mike R",
+                    description: "1-pager for hands-on users.",
+                    progress: 0,
+                    priority: "medium"
+                },
+
+                // --- DOCUMENTATION ---
+                {
+                    id: "DOC-001",
+                    title: "Getting started guide",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "getting-started"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Getting started guide for AI Agents.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "DOC-002",
+                    title: "Release notes",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "release-notes"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Official release notes for launch.",
+                    progress: 0,
+                    priority: "critical"
+                },
+                {
+                    id: "DOC-003",
+                    title: "When to use AI Agents guide",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "guide", "education"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Guide explaining when to use AI Agents vs other approaches.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "DOC-004",
+                    title: "Advanced patterns guide",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["docs", "guide", "advanced"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Advanced patterns and best practices guide for hands-on users.",
+                    progress: 0,
+                    priority: "high"
+                },
+
+                // --- SUNSETTING LEGACY AGENTS ---
+                {
+                    id: "SUN-001",
+                    title: "Legacy agents documentation banner",
+                    team: "support",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["sunsetting-legacy", "docs", "migration"],
+                    dependencies: [],
+                    owner: "Ella",
+                    description: "Add banner to legacy agent documentation pages directing users to new AI Agents.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "SUN-002",
+                    title: "Email to existing legacy agent users",
+                    team: "marketing",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["sunsetting-legacy", "email", "migration"],
+                    dependencies: [],
+                    owner: "Katerina",
+                    description: "Email campaign to existing legacy agent users announcing new AI Agents and migration path.",
+                    progress: 0,
+                    priority: "high"
+                },
+                {
+                    id: "SUN-003",
+                    title: "Remove global agents for non-users",
+                    team: "product",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["sunsetting-legacy", "cleanup", "global-agents"],
+                    dependencies: [],
+                    owner: "Engineering",
+                    description: "Remove global agents option for users who do not have an existing global agent.",
+                    progress: 0,
+                    priority: "medium"
+                },
+                {
+                    id: "SUN-004",
+                    title: "Modules as tools callable as subscenarios",
+                    team: "product",
+                    milestone: "2026-02-02",
+                    status: "on-track",
+                    tags: ["sunsetting-legacy", "modules", "subscenarios"],
+                    dependencies: [],
+                    owner: "Engineering",
+                    description: "Allow modules configured as tools to be called as subscenarios for migration compatibility.",
+                    progress: 0,
+                    priority: "high"
+                }
+            ]
+        };
+
+        // ========== POST-RELEASE DATA ==========
+        const POST_RELEASE_DATA = {
+            month1: [
+                { id: "PR-M1-001", title: "Bug triage & hotfixes", team: "product", status: "planned", owner: "Engineering", notes: "Daily monitoring of critical issues" },
+                { id: "PR-M1-002", title: "Performance monitoring", team: "product", status: "planned", owner: "Engineering", notes: "Track response times, error rates" },
+                { id: "PR-M1-003", title: "User feedback collection", team: "product", status: "planned", owner: "Vitek", notes: "Intercom, support tickets, NPS" },
+                { id: "PR-M1-004", title: "Feature usage analytics", team: "growth", status: "planned", owner: "Growth", notes: "Adoption rates, engagement metrics" },
+                { id: "PR-M1-005", title: "Support ticket analysis", team: "support", status: "planned", owner: "Support Lead", notes: "Common issues, documentation gaps" },
+                { id: "PR-M1-006", title: "Community engagement", team: "marketing", status: "planned", owner: "Michaela", notes: "Forum posts, success stories" },
+                { id: "PR-M1-007", title: "Quick wins implementation", team: "product", status: "planned", owner: "Engineering", notes: "Low-effort, high-impact improvements" },
+                { id: "PR-M1-008", title: "Influencer follow-up content", team: "marketing", status: "planned", owner: "Javi", notes: "Results & case studies" },
+                { id: "PR-M1-009", title: "Webinar series planning", team: "marketing", status: "planned", owner: "Katerina", notes: "Deep-dive sessions" },
+                { id: "PR-M1-010", title: "Documentation updates", team: "support", status: "planned", owner: "Ella", notes: "Based on common questions" }
+            ],
+            exploratory: [
+                { id: "PR-EX-001", title: "Agent marketplace exploration", team: "product", status: "not-started", owner: "Product", notes: "Community-built agents" },
+                { id: "PR-EX-002", title: "Advanced debugging tools", team: "product", status: "not-started", owner: "Engineering", notes: "Step-through execution, breakpoints" },
+                { id: "PR-EX-003", title: "Multi-agent orchestration", team: "product", status: "not-started", owner: "Product", notes: "Agents calling other agents" },
+                { id: "PR-EX-004", title: "Enterprise features", team: "product", status: "not-started", owner: "Product", notes: "SSO, audit logs, compliance" },
+                { id: "PR-EX-005", title: "Partner integrations", team: "growth", status: "not-started", owner: "Partnerships", notes: "Deep integrations with key platforms" },
+                { id: "PR-EX-006", title: "Agent templates library expansion", team: "product", status: "not-started", owner: "Product", notes: "Industry-specific templates" },
+                { id: "PR-EX-007", title: "AI model selection", team: "product", status: "not-started", owner: "Engineering", notes: "Multiple LLM provider support" },
+                { id: "PR-EX-008", title: "Agent analytics dashboard", team: "product", status: "not-started", owner: "Product", notes: "Cost tracking, performance insights" },
+                { id: "PR-EX-009", title: "Certification program", team: "support", status: "not-started", owner: "Education", notes: "Make AI Agents certification" },
+                { id: "PR-EX-010", title: "API v3 planning", team: "product", status: "not-started", owner: "Engineering", notes: "Based on developer feedback" },
+                { id: "PR-EX-011", title: "System prompt enhancer/improver", team: "product", status: "not-started", owner: "Product", notes: "AI-assisted prompt optimization and refinement tools" },
+                { id: "PR-EX-012", title: "Chat advanced settings", team: "product", status: "not-started", owner: "Product", notes: "Open up chat module to more configuration options" }
+            ]
+        };
+
+        // ========== STATE ==========
+        const state = {
+            activeTag: null,
+            activeTeamFilter: 'all',
+            currentBoard: 'release'
+        };
+
+        // ========== UTILITIES ==========
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric' }).replace('/', '.');
         }
 
-        // Sparkline Chart
-        const ctx = document.getElementById('sparklineChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12'],
-                datasets: [{
-                    data: [28.1, 28.9, 29.4, 30.1, 30.8, 31.2, 31.9, 32.4, 32.8, 33.1, 33.6, 34.2],
-                    borderColor: '#6C63FF',
-                    backgroundColor: 'rgba(108, 99, 255, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    pointHoverRadius: 6,
-                    pointHoverBackgroundColor: '#6C63FF',
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.y + '%';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        display: true,
-                        grid: { display: false },
-                        ticks: {
-                            font: { size: 10 },
-                            color: '#9CA3AF'
-                        }
-                    },
-                    y: {
-                        display: true,
-                        min: 25,
-                        max: 40,
-                        grid: {
-                            color: 'rgba(0,0,0,0.05)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            font: { size: 10 },
-                            color: '#9CA3AF',
-                            callback: function(value) {
-                                return value + '%';
-                            }
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
+        function formatDateLong(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+
+        function daysBetween(start, end) {
+            return Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24));
+        }
+
+        function getTeamColor(teamId) {
+            const team = RELEASE_DATA.config.teams.find(t => t.id === teamId);
+            return team ? team.color : '#6B7280';
+        }
+
+        function getTeamName(teamId) {
+            const team = RELEASE_DATA.config.teams.find(t => t.id === teamId);
+            return team ? team.name : teamId;
+        }
+
+        function formatStatus(status) {
+            return { 'on-track': 'On Track', 'at-risk': 'At Risk', 'blocked': 'Blocked' }[status] || status;
+        }
+
+        function formatPostReleaseStatus(status) {
+            return { 'planned': 'Planned', 'in-progress': 'In Progress', 'not-started': 'Not Started' }[status] || status;
+        }
+
+        // ========== BOARD SWITCHING ==========
+        function switchBoard(boardId) {
+            state.currentBoard = boardId;
+
+            const releaseContent = document.getElementById('release-board-content');
+            const postReleaseContent = document.getElementById('post-release-board');
+            const boardName = document.getElementById('current-board-name');
+            const teamFilterGroup = document.getElementById('team-filter-group');
+
+            // Update dropdown
+            document.querySelectorAll('.board-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.board === boardId);
+            });
+
+            // Close dropdown
+            document.getElementById('board-selector').classList.remove('open');
+
+            if (boardId === 'release') {
+                releaseContent.classList.remove('hidden');
+                postReleaseContent.classList.remove('active');
+                boardName.textContent = 'Release Board';
+                teamFilterGroup.style.display = '';
+            } else {
+                releaseContent.classList.add('hidden');
+                postReleaseContent.classList.add('active');
+                boardName.textContent = 'Post-Release Board';
+                teamFilterGroup.style.display = 'none';
+                renderPostReleaseTables();
             }
-        });
+        }
+
+        function setupBoardSelector() {
+            const selector = document.getElementById('board-selector');
+            const selectorTitle = selector.querySelector('.board-selector-title');
+
+            selectorTitle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selector.classList.toggle('open');
+            });
+
+            document.querySelectorAll('.board-option').forEach(opt => {
+                opt.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    switchBoard(opt.dataset.board);
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', () => {
+                selector.classList.remove('open');
+            });
+        }
+
+        // ========== POST-RELEASE TABLES ==========
+        function renderPostReleaseTables() {
+            renderPostReleaseTable('month-1-tbody', POST_RELEASE_DATA.month1);
+            renderPostReleaseTable('exploratory-tbody', POST_RELEASE_DATA.exploratory);
+        }
+
+        function renderPostReleaseTable(tbodyId, data) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = data.map(item => {
+                const teamColor = getTeamColor(item.team);
+                const teamName = getTeamName(item.team);
+                return `
+                    <tr>
+                        <td>
+                            <strong>${item.title}</strong>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${item.id}</div>
+                        </td>
+                        <td>
+                            <span class="table-team-badge" style="background: ${teamColor}15; color: ${teamColor};">
+                                <span class="table-team-dot" style="background: ${teamColor};"></span>
+                                ${teamName}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="table-status ${item.status}">${formatPostReleaseStatus(item.status)}</span>
+                        </td>
+                        <td>${item.owner}</td>
+                        <td style="color: var(--text-secondary); font-size: 13px;">${item.notes}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ========== RENDER MILESTONES ==========
+        function renderMilestones() {
+            const container = document.getElementById('milestones-container');
+            container.innerHTML = '';
+
+            RELEASE_DATA.config.milestones.forEach(milestone => {
+                const items = RELEASE_DATA.items.filter(i => i.milestone === milestone.date);
+                const onTrack = items.filter(i => i.status === 'on-track').length;
+                const atRisk = items.filter(i => i.status === 'at-risk').length;
+                const blocked = items.filter(i => i.status === 'blocked').length;
+
+                const col = document.createElement('div');
+                col.className = `milestone-column ${milestone.isLaunch ? 'is-launch' : ''}`;
+                col.dataset.date = milestone.date;
+
+                col.innerHTML = `
+                    <div class="milestone-header">
+                        <div class="milestone-date">${formatDate(milestone.date)}</div>
+                        <div class="milestone-label">${milestone.label}</div>
+                        <div class="milestone-stats">
+                            <span class="milestone-stat">
+                                <span class="milestone-stat-dot" style="background: var(--status-on-track);"></span>
+                                ${onTrack}
+                            </span>
+                            <span class="milestone-stat">
+                                <span class="milestone-stat-dot" style="background: var(--status-at-risk);"></span>
+                                ${atRisk}
+                            </span>
+                            <span class="milestone-stat">
+                                <span class="milestone-stat-dot" style="background: var(--status-blocked);"></span>
+                                ${blocked}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="milestone-body" data-milestone="${milestone.date}"></div>
+                `;
+
+                container.appendChild(col);
+
+                // Render items grouped by team
+                const body = col.querySelector('.milestone-body');
+                renderItemsByTeam(body, items);
+            });
+        }
+
+        function renderItemsByTeam(container, items) {
+            RELEASE_DATA.config.teams.forEach(team => {
+                const teamItems = items.filter(i => i.team === team.id);
+                if (teamItems.length === 0 && state.activeTeamFilter !== 'all' && state.activeTeamFilter !== team.id) return;
+
+                const section = document.createElement('div');
+                section.className = 'team-section';
+                section.dataset.team = team.id;
+
+                if (state.activeTeamFilter !== 'all' && state.activeTeamFilter !== team.id) {
+                    section.style.display = 'none';
+                }
+
+                section.innerHTML = `
+                    <div class="team-section-header">
+                        <div class="team-section-indicator" style="background: ${team.color};"></div>
+                        <span class="team-section-name">${team.name}</span>
+                        <span class="team-section-count">${teamItems.length}</span>
+                    </div>
+                `;
+
+                if (teamItems.length === 0) {
+                    section.innerHTML += `<div class="empty-team">No items</div>`;
+                } else {
+                    teamItems.forEach(item => {
+                        section.appendChild(createItemCard(item));
+                    });
+                }
+
+                container.appendChild(section);
+            });
+        }
+
+        function createItemCard(item) {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.dataset.id = item.id;
+            card.dataset.tags = item.tags.join(',');
+
+            if (state.activeTag && !item.tags.includes(state.activeTag)) {
+                card.classList.add('faded');
+            }
+            if (state.activeTag && item.tags.includes(state.activeTag)) {
+                card.classList.add('highlighted');
+            }
+
+            const teamColor = getTeamColor(item.team);
+
+            card.innerHTML = `
+                <div class="card-top">
+                    <div class="card-team-bar" style="background: ${teamColor};"></div>
+                    <div class="card-main">
+                        <div class="card-header">
+                            <span class="status-dot ${item.status}"></span>
+                            <span class="card-id">${item.id}</span>
+                        </div>
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-owner">${item.owner}</div>
+                    </div>
+                </div>
+                <div class="card-tags">
+                    ${item.tags.map(tag => `<span class="tag-pill ${state.activeTag === tag ? 'active' : ''}" data-tag="${tag}">${tag}</span>`).join('')}
+                </div>
+                <div class="card-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill ${item.status}" style="width: ${item.progress}%;"></div>
+                    </div>
+                    <span class="progress-text">${item.progress}%</span>
+                </div>
+            `;
+
+            card.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('tag-pill')) {
+                    openCardDetail(item.id);
+                }
+            });
+
+            return card;
+        }
+
+        // ========== TAG FILTERS (Persistent) ==========
+        function getAllTags() {
+            const tagCounts = {};
+            RELEASE_DATA.items.forEach(item => {
+                item.tags.forEach(tag => {
+                    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                });
+            });
+            // Sort by count (descending) then alphabetically
+            return Object.entries(tagCounts)
+                .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        }
+
+        function renderTagFilters() {
+            const container = document.getElementById('tag-filters-container');
+            const tags = getAllTags();
+
+            container.innerHTML = tags.map(([tag, count]) => `
+                <button class="filter-tag-pill ${state.activeTag === tag ? 'active' : ''}" data-tag="${tag}">
+                    ${tag}
+                    <span class="filter-tag-count">${count}</span>
+                </button>
+            `).join('');
+
+            // Add click listeners
+            container.querySelectorAll('.filter-tag-pill').forEach(pill => {
+                pill.addEventListener('click', () => handleTagClick(pill.dataset.tag));
+            });
+        }
+
+        function updateTagFilterUI() {
+            // Update persistent filter pills
+            document.querySelectorAll('.filter-tag-pill').forEach(pill => {
+                pill.classList.toggle('active', pill.dataset.tag === state.activeTag);
+            });
+
+            // Update clear button visibility
+            const clearBtn = document.getElementById('clear-tag-filter');
+            clearBtn.classList.toggle('visible', state.activeTag !== null);
+        }
+
+        // ========== TAG FILTERING ==========
+        function handleTagClick(tagName) {
+            const activeTagsSection = document.getElementById('active-tags');
+
+            if (state.activeTag === tagName) {
+                clearTagFilter();
+                return;
+            }
+
+            state.activeTag = tagName;
+            const tagCount = RELEASE_DATA.items.filter(item => item.tags.includes(tagName)).length;
+
+            activeTagsSection.innerHTML = `
+                <span class="active-tag-label">Filtering by tag:</span>
+                <span class="active-tag-pill">
+                    ${tagName}
+                    <span class="tag-count">${tagCount}</span>
+                    <button class="clear-tag-btn" onclick="clearTagFilter()">&times;</button>
+                </span>
+            `;
+            activeTagsSection.classList.add('visible');
+
+            document.querySelectorAll('.item-card').forEach(card => {
+                const cardTags = card.dataset.tags.split(',');
+                card.classList.toggle('faded', !cardTags.includes(tagName));
+                card.classList.toggle('highlighted', cardTags.includes(tagName));
+            });
+
+            document.querySelectorAll('.tag-pill').forEach(pill => {
+                pill.classList.toggle('active', pill.dataset.tag === tagName);
+            });
+
+            updateTagFilterUI();
+        }
+
+        function clearTagFilter() {
+            state.activeTag = null;
+            document.getElementById('active-tags').innerHTML = '';
+            document.getElementById('active-tags').classList.remove('visible');
+
+            document.querySelectorAll('.item-card').forEach(card => {
+                card.classList.remove('faded', 'highlighted');
+            });
+
+            updateTagFilterUI();
+            document.querySelectorAll('.tag-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+        }
+
+        // ========== TEAM FILTERING ==========
+        function handleTeamFilter(teamId) {
+            state.activeTeamFilter = teamId;
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === teamId);
+            });
+
+            document.querySelectorAll('.team-section').forEach(section => {
+                const show = teamId === 'all' || section.dataset.team === teamId;
+                section.style.display = show ? '' : 'none';
+            });
+        }
+
+        // ========== MODAL ==========
+        function openCardDetail(itemId) {
+            const item = RELEASE_DATA.items.find(i => i.id === itemId);
+            if (!item) return;
+
+            const overlay = document.getElementById('card-detail-overlay');
+            const modal = document.getElementById('card-detail-modal');
+            const team = RELEASE_DATA.config.teams.find(t => t.id === item.team);
+            const milestone = RELEASE_DATA.config.milestones.find(m => m.date === item.milestone);
+
+            modal.innerHTML = `
+                <button class="modal-close" onclick="closeCardDetail()">&times;</button>
+                <div class="modal-header">
+                    <div class="modal-status-badge ${item.status}">
+                        <span class="status-dot ${item.status}"></span>
+                        ${formatStatus(item.status)}
+                    </div>
+                    <h2 class="modal-title">${item.title}</h2>
+                    <p class="modal-team" style="color: ${team.color};">${team.name} &middot; ${item.id}</p>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-row">
+                        <span class="modal-label">Owner</span>
+                        <span class="modal-value">${item.owner}</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">Due Date</span>
+                        <span class="modal-value">${formatDateLong(item.milestone)} (${milestone.label})</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">Progress</span>
+                        <div class="modal-progress-container">
+                            <div class="modal-progress">
+                                <div class="modal-progress-bar" style="width: ${item.progress}%;"></div>
+                            </div>
+                            <span class="modal-progress-value">${item.progress}%</span>
+                        </div>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">Priority</span>
+                        <span class="priority-badge ${item.priority}">${item.priority}</span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-label">Tags</span>
+                        <div class="modal-tags">
+                            ${item.tags.map(tag => `<span class="tag-pill" data-tag="${tag}" onclick="handleTagClick('${tag}'); closeCardDetail();">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                    ${item.dependencies.length > 0 ? `
+                        <div class="modal-row">
+                            <span class="modal-label">Depends On</span>
+                            <div class="modal-dependencies">
+                                ${item.dependencies.map(dep => `<span class="dependency-pill" onclick="closeCardDetail(); setTimeout(() => openCardDetail('${dep}'), 200);">${dep}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    <div class="modal-row">
+                        <span class="modal-label">Description</span>
+                        <p class="modal-description-text">${item.description}</p>
+                    </div>
+                </div>
+            `;
+
+            overlay.classList.add('visible');
+        }
+
+        function closeCardDetail() {
+            document.getElementById('card-detail-overlay').classList.remove('visible');
+        }
+
+        // ========== SUMMARY STATS ==========
+        function updateSummaryStats() {
+            const items = RELEASE_DATA.items;
+            const launchMilestone = RELEASE_DATA.config.milestones.find(m => m.isLaunch);
+
+            // Days to launch
+            const today = new Date().toISOString().split('T')[0];
+            const daysToLaunch = daysBetween(today, launchMilestone.date);
+            document.getElementById('countdown-days').textContent = Math.max(0, daysToLaunch);
+
+            // Risk counts
+            const atRisk = items.filter(i => i.status === 'at-risk').length;
+            const blocked = items.filter(i => i.status === 'blocked').length;
+            document.getElementById('at-risk-count').textContent = atRisk + blocked;
+            document.getElementById('blocked-detail').textContent = `${blocked} blocked`;
+
+            // Total
+            document.getElementById('total-items').textContent = items.length;
+
+            // Health
+            const avgProgress = Math.round(items.reduce((sum, i) => sum + i.progress, 0) / items.length);
+            document.getElementById('health-detail').textContent = `${avgProgress}% complete`;
+
+            const healthIndicator = document.getElementById('health-indicator');
+            const healthStatus = document.getElementById('health-status');
+
+            if (blocked > 0) {
+                healthIndicator.className = 'health-indicator blocked';
+                healthStatus.textContent = 'At Risk';
+            } else if (atRisk > 2) {
+                healthIndicator.className = 'health-indicator at-risk';
+                healthStatus.textContent = 'At Risk';
+            } else {
+                healthIndicator.className = 'health-indicator on-track';
+                healthStatus.textContent = 'On Track';
+            }
+        }
+
+        // ========== EVENT LISTENERS ==========
+        function setupEventListeners() {
+            // Tag clicks
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tag-pill') && !e.target.closest('.modal-tags')) {
+                    e.stopPropagation();
+                    handleTagClick(e.target.dataset.tag);
+                }
+            });
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleTeamFilter(btn.dataset.filter));
+            });
+
+            // Modal close
+            document.getElementById('card-detail-overlay').addEventListener('click', (e) => {
+                if (e.target.id === 'card-detail-overlay') closeCardDetail();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeCardDetail();
+            });
+        }
+
+        // ========== INIT ==========
+        function init() {
+            setupBoardSelector();
+            renderTagFilters();
+            renderMilestones();
+            updateSummaryStats();
+            setupEventListeners();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
