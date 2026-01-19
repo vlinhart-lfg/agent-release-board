@@ -1282,6 +1282,243 @@
             background: rgba(249, 115, 22, 0.1);
             color: #F97316;
         }
+
+        /* User Journey funnel icon for dropdown */
+        .board-option-icon.funnel {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8B5CF6;
+        }
+
+        /* ========== USER JOURNEY FUNNEL VIEW ========== */
+        .user-journey-funnel {
+            display: none;
+        }
+
+        .user-journey-funnel.active {
+            display: block;
+        }
+
+        .funnel-visualization {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            padding: 32px;
+            background: var(--bg-white);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .funnel-stage-card {
+            padding: 24px 32px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 180px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .funnel-stage-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .funnel-stage-card.discovery {
+            background: linear-gradient(135deg, #DDD6FE, #C4B5FD);
+        }
+
+        .funnel-stage-card.experimenting {
+            background: linear-gradient(135deg, #C7D2FE, #A5B4FC);
+        }
+
+        .funnel-stage-card.optimising {
+            background: linear-gradient(135deg, #A7F3D0, #6EE7B7);
+        }
+
+        .funnel-stage-label {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .funnel-stage-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        .funnel-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+        }
+
+        .funnel-arrow svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .conversion-rate {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .journey-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .journey-column {
+            background: var(--bg-white);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .journey-column-header {
+            padding: 16px 20px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .journey-column-header.discovery {
+            border-bottom-color: #8B5CF6;
+        }
+
+        .journey-column-header.experimenting {
+            border-bottom-color: #6366F1;
+        }
+
+        .journey-column-header.optimising {
+            border-bottom-color: #10B981;
+        }
+
+        .journey-column-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .journey-column-dot.discovery {
+            background: #8B5CF6;
+        }
+
+        .journey-column-dot.experimenting {
+            background: #6366F1;
+        }
+
+        .journey-column-dot.optimising {
+            background: #10B981;
+        }
+
+        .journey-column-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .journey-column-count {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-left: auto;
+            background: var(--bg-light);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .journey-column-items {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .funnel-item-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .funnel-item-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .funnel-item-card.faded {
+            opacity: 0.2;
+        }
+
+        .funnel-item-card.highlighted {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+        }
+
+        .funnel-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .funnel-card-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .funnel-card-status.on-track { background: var(--status-on-track); }
+        .funnel-card-status.at-risk { background: var(--status-at-risk); }
+        .funnel-card-status.blocked { background: var(--status-blocked); }
+
+        .funnel-card-id {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .funnel-card-touchpoint {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-left: auto;
+            background: var(--bg-white);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .funnel-card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+
+        .funnel-card-owner {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .journey-column-empty {
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -1319,6 +1556,17 @@
                                 <div class="board-option-text">
                                     <div class="board-option-title">Horizontal</div>
                                     <div class="board-option-desc">Touchpoints view</div>
+                                </div>
+                            </div>
+                            <div class="board-option" data-board="user-journey">
+                                <div class="board-option-icon funnel">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                </div>
+                                <div class="board-option-text">
+                                    <div class="board-option-title">User Journey</div>
+                                    <div class="board-option-desc">Adoption funnel view</div>
                                 </div>
                             </div>
                         </div>
@@ -1413,6 +1661,12 @@
             <div class="journey-scroll-container">
                 <div class="touchpoints-grid" id="touchpoints-grid"></div>
             </div>
+        </div>
+
+        <!-- User Journey Funnel View -->
+        <div class="user-journey-funnel" id="user-journey-funnel">
+            <div class="funnel-visualization" id="funnel-viz"></div>
+            <div class="journey-columns" id="journey-columns"></div>
         </div>
 
         <!-- Modal -->
@@ -2395,6 +2649,48 @@
             { id: 'academy', label: 'Academy', tags: ['academy', 'course', 'training', 'education'], color: '#14B8A6' }
         ];
 
+        // ========== USER JOURNEY STAGES ==========
+        const USER_JOURNEY_STAGES = [
+            {
+                id: 'discovery',
+                label: 'Discovery',
+                subtitle: 'Using AI modules',
+                description: 'Awareness & education about AI agents',
+                color: '#8B5CF6',
+                conversionRate: null
+            },
+            {
+                id: 'experimenting',
+                label: 'Experimenting',
+                subtitle: 'Building agents',
+                description: 'Getting started & first agents',
+                color: '#6366F1',
+                conversionRate: '12%'
+            },
+            {
+                id: 'optimising',
+                label: 'Optimising',
+                subtitle: '3+ active agents',
+                description: 'Advanced usage & scaling',
+                color: '#10B981',
+                conversionRate: '28%'
+            }
+        ];
+
+        // Tag-based mapping for journey stages
+        const JOURNEY_STAGE_TAGS = {
+            discovery: ['design', 'creative', 'visuals', 'video', 'demo', 'landing-page', 'interactive',
+                'launch', 'explainer', 'announcement', 'social', 'paid-media', 'ads', 'pr', 'press',
+                'influencers', 'thought-leadership', 'decision-framework', 'education', 'academy', 'course',
+                'linkedin', 'twitter', 'reddit', 'threads'],
+            experimenting: ['onboarding', 'getting-started', 'in-product', 'banner', 'prompts', 'adoption',
+                'technical', 'webinar', 'email', 'newsletter', 'library', 'knowledge', 'context', 'files',
+                'input', 'deprecation', 'release-notes', 'guide', 'docs', 'community', 'product-feature'],
+            optimising: ['advanced', 'post-launch', 'success-story', 'sales-enablement', 'enterprise',
+                'executive', 'conference', 'challenge', 'analyst', 'global', 'local', 'scaling',
+                'sales', 'one-pager', 'competitive', 'training', 'internal', 'events', 'hackathon']
+        };
+
         // ========== STATE ==========
         const state = {
             activeTag: null,
@@ -2437,6 +2733,7 @@
 
             const releaseContent = document.getElementById('release-board-content');
             const journeyView = document.getElementById('user-journey-view');
+            const funnelView = document.getElementById('user-journey-funnel');
             const boardName = document.getElementById('current-board-name');
             const teamFilterGroup = document.getElementById('team-filter-group');
 
@@ -2451,6 +2748,7 @@
             // Hide all views first
             releaseContent.classList.add('hidden');
             journeyView.classList.remove('active');
+            funnelView.classList.remove('active');
 
             if (boardId === 'release') {
                 releaseContent.classList.remove('hidden');
@@ -2461,6 +2759,11 @@
                 boardName.textContent = 'Horizontal';
                 teamFilterGroup.style.display = 'none';
                 renderUserJourneyView();
+            } else if (boardId === 'user-journey') {
+                funnelView.classList.add('active');
+                boardName.textContent = 'User Journey';
+                teamFilterGroup.style.display = 'none';
+                renderUserJourneyFunnel();
             }
         }
 
@@ -2572,6 +2875,118 @@
                             ${displayTags.map(tag => `<span class="journey-card-tag">${tag}</span>`).join('')}
                         </div>
                     ` : ''}
+                </div>
+            `;
+        }
+
+        // ========== USER JOURNEY FUNNEL VIEW ==========
+        function getJourneyStageForItem(item) {
+            // Priority: optimising > experimenting > discovery
+            if (item.tags.some(t => JOURNEY_STAGE_TAGS.optimising.includes(t))) return 'optimising';
+            if (item.tags.some(t => JOURNEY_STAGE_TAGS.experimenting.includes(t))) return 'experimenting';
+            return 'discovery';
+        }
+
+        function renderUserJourneyFunnel() {
+            renderFunnelVisualization();
+            renderJourneyColumns();
+        }
+
+        function renderFunnelVisualization() {
+            const container = document.getElementById('funnel-viz');
+
+            let html = '';
+            USER_JOURNEY_STAGES.forEach((stage, index) => {
+                html += `
+                    <div class="funnel-stage-card ${stage.id}">
+                        <div class="funnel-stage-label">${stage.label}</div>
+                        <div class="funnel-stage-subtitle">${stage.subtitle}</div>
+                    </div>
+                `;
+
+                // Add arrow between stages (not after the last one)
+                if (index < USER_JOURNEY_STAGES.length - 1) {
+                    const nextStage = USER_JOURNEY_STAGES[index + 1];
+                    html += `
+                        <div class="funnel-arrow">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                            <div class="conversion-rate">${nextStage.conversionRate || ''}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderJourneyColumns() {
+            const container = document.getElementById('journey-columns');
+
+            // Group items by journey stage
+            const itemsByStage = {
+                discovery: [],
+                experimenting: [],
+                optimising: []
+            };
+
+            RELEASE_DATA.items.forEach(item => {
+                const stage = getJourneyStageForItem(item);
+                itemsByStage[stage].push(item);
+            });
+
+            let html = '';
+
+            USER_JOURNEY_STAGES.forEach(stage => {
+                const items = itemsByStage[stage.id];
+
+                html += `
+                    <div class="journey-column">
+                        <div class="journey-column-header ${stage.id}">
+                            <div class="journey-column-dot ${stage.id}"></div>
+                            <div class="journey-column-title">${stage.label}</div>
+                            <div class="journey-column-count">${items.length} items</div>
+                        </div>
+                        <div class="journey-column-items">
+                            ${items.length > 0
+                                ? items.map(item => renderFunnelItemCard(item)).join('')
+                                : '<div class="journey-column-empty">No items in this stage</div>'
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Add click handlers
+            container.querySelectorAll('.funnel-item-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    openCardDetail(card.dataset.itemId);
+                });
+            });
+        }
+
+        function renderFunnelItemCard(item) {
+            let classes = 'funnel-item-card';
+            if (state.activeTag) {
+                classes += item.tags.includes(state.activeTag) ? ' highlighted' : ' faded';
+            }
+
+            // Get touchpoint for display
+            const touchpoint = getTouchpointForItem(item);
+            const touchpointLabel = touchpoint ? touchpoint.label : '';
+
+            return `
+                <div class="${classes}" data-item-id="${item.id}">
+                    <div class="funnel-card-header">
+                        <div class="funnel-card-status ${item.status}"></div>
+                        <span class="funnel-card-id">${item.id}</span>
+                        <span class="funnel-card-touchpoint">${touchpointLabel}</span>
+                    </div>
+                    <div class="funnel-card-title">${item.title}</div>
+                    <div class="funnel-card-owner">${item.owner}</div>
                 </div>
             `;
         }
